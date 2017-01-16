@@ -68,6 +68,18 @@ extension Configuration {
                 return .failure(.usageError(description: errorMessage))
             }
             return .success(files)
+        }.flatMap { (files) -> Result<[File], CommandantError<()>> in
+            if useScriptInputFiles {
+                let excluded = excludedPaths()
+                let filteredFiles = files.filter {
+                    guard let path = $0.path else {
+                        return false
+                    }
+                    return !excluded.contains(path)
+                }
+                return .success(filteredFiles)
+            }
+            return .success(files)
         }.flatMap { files in
             let queue = DispatchQueue(label: "io.realm.swiftlint.indexIncrementer")
             var index = 0
