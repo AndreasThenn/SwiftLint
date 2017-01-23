@@ -6,8 +6,37 @@
 
 ##### Enhancements
 
+* Performance improvements to `generic_type_name` and 
+  `redundant_nil_coalescing` rules.  
+  [Marcelo Fabri](https://github.com/marcelofabri)
+
+##### Bug Fixes
+
+* None.
+
+## 0.16.1: Commutative Fabric Sheets
+
+##### Breaking
+
+* None.
+
+##### Enhancements
+
 * Improve `unused_optional_binding` rule on tuples check.  
   [Rafael Machado](https://github.com/rakaramos/)
+
+* Update `variable_name` to ignore overrides.  
+  [Aaron McTavish](https://github.com/aamctustwo)
+  [#1169](https://github.com/realm/SwiftLint/issues/1169)
+
+* Update `number_separator` rule to allow for specifying
+  minimum length of fraction.  
+  [Bjarke Søndergaard](https://github.com/bjarkehs)
+  [#1200](https://github.com/realm/SwiftLint/issues/1200)
+
+* Update `legacy_constant` rule to support `CGFloat.pi` and `Float.pi`.  
+  [Aaron McTavish](https://github.com/aamctustwo)
+  [#1198](https://github.com/realm/SwiftLint/issues/1198)
 
 ##### Bug Fixes
 
@@ -28,6 +57,18 @@
 * Fix `excluded` configuration not excluding files.  
   [Marcelo Fabri](https://github.com/marcelofabri)
   [#1166](https://github.com/realm/SwiftLint/issues/1166)
+
+* Disable commutative operations on `shorthand_operator` rule.  
+  [Marcelo Fabri](https://github.com/marcelofabri)
+  [#1182](https://github.com/realm/SwiftLint/issues/1182)
+  [#1183](https://github.com/realm/SwiftLint/issues/1183)
+  [#1211](https://github.com/realm/SwiftLint/issues/1211)
+
+* Fix crash when running in a Sandboxed environment, which also fixes Homebrew
+  distribution. Set the `SWIFTLINT_SWIFT_VERSION` environment variable to either
+  `2` or `3` to force that operation mode, bypassing the Swift version
+  determined from SourceKit.  
+  [JP Simard](https://github.com/jpsim)
 
 ## 0.16.0: Maximum Energy Efficiency Setting
 
