@@ -39,8 +39,8 @@ public struct ExplicitInitRule: ASTRule, ConfigurationProviderRule, CorrectableR
                          dictionary: [String: SourceKitRepresentable]) -> [StyleViolation] {
         return violationRanges(in: file, kind: kind, dictionary: dictionary).map {
             StyleViolation(ruleDescription: type(of: self).description,
-                severity: configuration.severity,
-                location: Location(file: file, characterOffset: $0.location))
+                           severity: configuration.severity,
+                           location: Location(file: file, characterOffset: $0.location))
         }
     }
 
@@ -78,8 +78,8 @@ public struct ExplicitInitRule: ASTRule, ConfigurationProviderRule, CorrectableR
     }
 
     private func violationRanges(in file: File) -> [NSRange] {
-        return violationRanges(in: file, dictionary: file.structure.dictionary).sorted { lh, rh in
-            lh.location > rh.location
+        return violationRanges(in: file, dictionary: file.structure.dictionary).sorted { lhs, rhs in
+            lhs.location > rhs.location
         }
     }
 

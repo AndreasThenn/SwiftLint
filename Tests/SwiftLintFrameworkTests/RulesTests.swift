@@ -41,7 +41,7 @@ class RulesTests: XCTestCase {
     }
 
     func testConditionalReturnsOnNewline() {
-        verifyRule(ConditionalReturnsOnNewline.description)
+        verifyRule(ConditionalReturnsOnNewlineRule.description)
     }
 
     func testControlStatement() {
@@ -52,12 +52,20 @@ class RulesTests: XCTestCase {
         verifyRule(CyclomaticComplexityRule.description)
     }
 
+    func testDiscardedNotificationCenterObserver() {
+        verifyRule(DiscardedNotificationCenterObserverRule.description)
+    }
+
     func testDynamicInline() {
         verifyRule(DynamicInlineRule.description)
     }
 
     func testEmptyCount() {
         verifyRule(EmptyCountRule.description)
+    }
+
+    func testEmptyEnumArguments() {
+        verifyRule(EmptyEnumArgumentsRule.description)
     }
 
     func testEmptyParameters() {
@@ -70,6 +78,22 @@ class RulesTests: XCTestCase {
 
     func testExplicitInit() {
         verifyRule(ExplicitInitRule.description)
+    }
+
+    func testExplicitTopLevelACL() {
+        verifyRule(ExplicitTopLevelACLRule.description)
+    }
+
+    func testExplicitTypeInterface() {
+        verifyRule(ExplicitTypeInterfaceRule.description)
+    }
+
+    func testExtensionAccessModifier() {
+        verifyRule(ExtensionAccessModifierRule.description)
+    }
+
+    func testFatalErrorMessage() {
+        verifyRule(FatalErrorMessageRule.description)
     }
 
     func testFileLength() {
@@ -93,6 +117,10 @@ class RulesTests: XCTestCase {
         verifyRule(ForceUnwrappingRule.description)
     }
 
+    func testForWhere() {
+        verifyRule(ForWhereRule.description)
+    }
+
     func testFunctionBodyLength() {
         verifyRule(FunctionBodyLengthRule.description)
     }
@@ -101,12 +129,16 @@ class RulesTests: XCTestCase {
         verifyRule(FunctionParameterCountRule.description)
     }
 
-    func testGenericTypeName() {
-        verifyRule(GenericTypeNameRule.description)
-    }
-
     func testImplicitGetter() {
         verifyRule(ImplicitGetterRule.description)
+    }
+
+    func testImplicitlyUnwrappedOptional() {
+        verifyRule(ImplicitlyUnwrappedOptionalRule.description)
+    }
+
+    func testImplicitReturn() {
+        verifyRule(ImplicitReturnRule.description)
     }
 
     func testLargeTuple() {
@@ -137,22 +169,24 @@ class RulesTests: XCTestCase {
         verifyRule(MarkRule.description, commentDoesntViolate: false)
     }
 
-// swiftlint:disable:next todo
-// FIXME: https://github.com/jpsim/SourceKitten/issues/269
-//    func testMissingDocs() {
-//        verifyRule(MissingDocsRule.description)
-//    }
+    func testMultilineParameters() {
+        verifyRule(MultilineParametersRule.description)
+    }
 
     func testNesting() {
         verifyRule(NestingRule.description)
     }
 
-    func testNimbleOperator() {
-        verifyRule(NimbleOperatorRule.description)
+    func testNoExtensionAccessModifierRule() {
+        verifyRule(NoExtensionAccessModifierRule.description)
     }
 
-    func testObjectLiteral() {
-        verifyRule(ObjectLiteralRule.description)
+    func testNotificationCenterDetachment() {
+        verifyRule(NotificationCenterDetachmentRule.description)
+    }
+
+    func testNimbleOperator() {
+        verifyRule(NimbleOperatorRule.description)
     }
 
     func testOpeningBrace() {
@@ -191,6 +225,14 @@ class RulesTests: XCTestCase {
 
     func testProhibitedSuper() {
         verifyRule(ProhibitedSuperRule.description)
+    }
+
+    func testProtocolPropertyAccessorsOrder() {
+        verifyRule(ProtocolPropertyAccessorsOrderRule.description)
+    }
+
+    func testRedundantDiscardableLet() {
+        verifyRule(RedundantDiscardableLetRule.description)
     }
 
     func testRedundantNilCoalescing() {
@@ -238,10 +280,6 @@ class RulesTests: XCTestCase {
         verifyRule(SyntacticSugarRule.description)
     }
 
-    func testTodo() {
-        verifyRule(TodoRule.description, commentDoesntViolate: false)
-    }
-
     func testTrailingNewline() {
         verifyRule(TrailingNewlineRule.description, commentDoesntViolate: false,
                    stringDoesntViolate: false)
@@ -259,11 +297,11 @@ class RulesTests: XCTestCase {
         let baseDescription = TrailingWhitespaceRule.description
         let nonTriggeringExamples = baseDescription.nonTriggeringExamples + [" \n"]
         let description = RuleDescription(identifier: baseDescription.identifier,
-                                                name: baseDescription.name,
-                                         description: baseDescription.description,
-                               nonTriggeringExamples: nonTriggeringExamples,
-                                  triggeringExamples: baseDescription.triggeringExamples,
-                                         corrections: baseDescription.corrections)
+                                          name: baseDescription.name,
+                                          description: baseDescription.description,
+                                          nonTriggeringExamples: nonTriggeringExamples,
+                                          triggeringExamples: baseDescription.triggeringExamples,
+                                          corrections: baseDescription.corrections)
         verifyRule(description,
                    ruleConfiguration: ["ignores_empty_lines": true, "ignores_comments": true])
 
@@ -288,10 +326,6 @@ class RulesTests: XCTestCase {
         verifyRule(TypeBodyLengthRule.description)
     }
 
-    func testTypeName() {
-        verifyRule(TypeNameRule.description)
-    }
-
     func testUnusedClosureParameter() {
         verifyRule(UnusedClosureParameterRule.description)
     }
@@ -300,22 +334,12 @@ class RulesTests: XCTestCase {
         verifyRule(UnusedEnumeratedRule.description)
     }
 
-    func testUnusedOptionalBinding() {
-        verifyRule(UnusedOptionalBindingRule.description)
-    }
-
-// swiftlint:disable:next todo
-// FIXME: https://github.com/jpsim/SourceKitten/issues/269
-//    func testValidDocs() {
-//        verifyRule(ValidDocsRule.description)
-//    }
-
     func testValidIBInspectable() {
         verifyRule(ValidIBInspectableRule.description)
     }
 
-    func testVariableName() {
-        verifyRule(VariableNameRule.description)
+    func testVerticalParameterAlignmentOnCall() {
+        verifyRule(VerticalParameterAlignmentOnCallRule.description)
     }
 
     func testVerticalParameterAlignment() {
@@ -332,79 +356,5 @@ class RulesTests: XCTestCase {
 
     func testWeakDelegate() {
         verifyRule(WeakDelegateRule.description)
-    }
-
-}
-
-extension RulesTests {
-    static var allTests: [(String, (RulesTests) -> () throws -> Void)] {
-        return [
-            ("testClassDelegateProtocol", testClassDelegateProtocol),
-            ("testClosingBrace", testClosingBrace),
-            ("testComma", testComma),
-            ("testCompilerProtocolInit", testCompilerProtocolInit),
-            ("testClosureEndIndentation", testClosureEndIndentation),
-            ("testClosureParameterPosition", testClosureParameterPosition),
-            ("testClosureSpacing", testClosureSpacing),
-            ("testConditionalReturnsOnNewline", testConditionalReturnsOnNewline),
-            ("testControlStatement", testControlStatement),
-            ("testCyclomaticComplexity", testCyclomaticComplexity),
-            ("testDynamicInline", testDynamicInline),
-            ("testEmptyCount", testEmptyCount),
-            ("testEmptyParameters", testEmptyParameters),
-            ("testEmptyParenthesesWithTrailingClosure", testEmptyParenthesesWithTrailingClosure),
-            ("testExplicitInit", testExplicitInit),
-            ("testFileLength", testFileLength),
-            ("testFirstWhere", testFirstWhere),
-            ("testForceCast", testForceCast),
-            ("testForceTry", testForceTry),
-            // ("testForceUnwrapping", testForceUnwrapping),
-            ("testFunctionBodyLength", testFunctionBodyLength),
-            ("testFunctionParameterCount", testFunctionParameterCount),
-            ("testGenericTypeName", testGenericTypeName),
-            ("testImplicitGetter", testImplicitGetter),
-            ("testLargeTuple", testLargeTuple),
-            ("testLeadingWhitespace", testLeadingWhitespace),
-            ("testLegacyCGGeometryFunctions", testLegacyCGGeometryFunctions),
-            ("testLegacyNSGeometryFunctions", testLegacyNSGeometryFunctions),
-            ("testLegacyConstant", testLegacyConstant),
-            ("testLegacyConstructor", testLegacyConstructor),
-            ("testMark", testMark),
-            ("testNesting", testNesting),
-            ("testNimbleOperator", testNimbleOperator),
-            ("testObjectLiteral", testObjectLiteral),
-            ("testOpeningBrace", testOpeningBrace),
-            ("testOperatorFunctionWhitespace", testOperatorFunctionWhitespace),
-            ("testOperatorUsageWhitespace", testOperatorUsageWhitespace),
-            ("testPrivateOutlet", testPrivateOutlet),
-            ("testPrivateUnitTest", testPrivateUnitTest),
-            ("testProhibitedSuper", testProhibitedSuper),
-            ("testRedundantNilCoalescing", testRedundantNilCoalescing),
-            ("testRedundantOptionalInitialization", testRedundantOptionalInitialization),
-            ("testRedundantStringEnumValue", testRedundantStringEnumValue),
-            ("testRedundantVoidReturn", testRedundantVoidReturn),
-            ("testReturnArrowWhitespace", testReturnArrowWhitespace),
-            ("testShorthandOperator", testShorthandOperator),
-            ("testSortedImports", testSortedImports),
-            ("testStatementPosition", testStatementPosition),
-            ("testStatementPositionUncuddled", testStatementPositionUncuddled),
-            ("testSwitchCaseOnNewline", testSwitchCaseOnNewline),
-            ("testSyntacticSugar", testSyntacticSugar),
-            ("testTodo", testTodo),
-            ("testTrailingNewline", testTrailingNewline),
-            ("testTrailingSemicolon", testTrailingSemicolon),
-            ("testTrailingWhitespace", testTrailingWhitespace),
-            ("testTypeBodyLength", testTypeBodyLength),
-            ("testTypeName", testTypeName),
-            ("testUnusedClosureParameter", testUnusedClosureParameter),
-            ("testUnusedEnumerated", testUnusedEnumerated),
-            ("testUnusedOptionalBinding", testUnusedOptionalBinding),
-            ("testValidIBInspectable", testValidIBInspectable),
-            ("testVariableName", testVariableName),
-            ("VerticalParameterAlignment", testVerticalParameterAlignment),
-            ("testVoidReturn", testVoidReturn),
-            ("testSuperCall", testSuperCall),
-            ("testWeakDelegate", testWeakDelegate)
-        ]
     }
 }

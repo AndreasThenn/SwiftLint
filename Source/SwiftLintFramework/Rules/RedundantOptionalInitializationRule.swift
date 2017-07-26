@@ -36,7 +36,9 @@ public struct RedundantOptionalInitializationRule: ASTRule, CorrectableRule, Con
             "var foo: Int? = {\n" +
             "   if bar != nil { }\n" +
             "   return 0\n" +
-            "}()\n"
+            "}()\n",
+            // lazy variables need to be initialized
+            "lazy var test: Int? = nil"
         ],
         triggeringExamples: [
             "var myVar: Int?↓ = nil\n",
@@ -69,6 +71,7 @@ public struct RedundantOptionalInitializationRule: ASTRule, CorrectableRule, Con
             dictionary.setterAccessibility != nil,
             let type = dictionary.typeName,
             typeIsOptional(type),
+            !dictionary.enclosedSwiftAttributes.contains("source.decl.attribute.lazy"),
             let range = range(for: dictionary, file: file),
             let match = file.match(pattern: pattern, with: [.keyword], range: range).first,
             match.location == range.location + range.length - match.length else {
@@ -104,8 +107,8 @@ public struct RedundantOptionalInitializationRule: ASTRule, CorrectableRule, Con
     }
 
     private func violationRanges(in file: File) -> [NSRange] {
-        return violationRanges(in: file, dictionary: file.structure.dictionary).sorted { lh, rh in
-            lh.location < rh.location
+        return violationRanges(in: file, dictionary: file.structure.dictionary).sorted { lhs, rhs in
+            lhs.location < rhs.location
         }
     }
 

@@ -10,7 +10,7 @@ import Foundation
 import SourceKittenFramework
 
 public struct CyclomaticComplexityRule: ASTRule, ConfigurationProviderRule {
-    public var configuration = SeverityLevelsConfiguration(warning: 10, error: 20)
+    public var configuration = CyclomaticComplexityConfiguration(warning: 10, error: 20)
 
     public init() {}
 
@@ -40,7 +40,7 @@ public struct CyclomaticComplexityRule: ASTRule, ConfigurationProviderRule {
 
     public func validate(file: File, kind: SwiftDeclarationKind,
                          dictionary: [String: SourceKitRepresentable]) -> [StyleViolation] {
-        if !SwiftDeclarationKind.functionKinds().contains(kind) {
+        guard SwiftDeclarationKind.functionKinds().contains(kind) else {
             return []
         }
 
@@ -48,11 +48,12 @@ public struct CyclomaticComplexityRule: ASTRule, ConfigurationProviderRule {
 
         for parameter in configuration.params where complexity > parameter.value {
             let offset = dictionary.offset ?? 0
+            let reason = "Function should have complexity \(configuration.length.warning) or less: " +
+                         "currently complexity equals \(complexity)"
             return [StyleViolation(ruleDescription: type(of: self).description,
-                severity: parameter.severity,
-                location: Location(file: file, byteOffset: offset),
-                reason: "Function should have complexity \(configuration.warning) or less: " +
-                        "currently complexity equals \(complexity)")]
+                                   severity: parameter.severity,
+                                   location: Location(file: file, byteOffset: offset),
+                                   reason: reason)]
         }
 
         return []
@@ -78,13 +79,13 @@ public struct CyclomaticComplexityRule: ASTRule, ConfigurationProviderRule {
             if statementKind == .switch {
                 hasSwitchStatements = true
             }
-
+            let score = configuration.complexityStatements.contains(statementKind) ? 1 : 0
             return complexity +
-                (complexityStatements.contains(statementKind) ? 1 : 0) +
+                score +
                 measureComplexity(in: file, dictionary: subDict)
         }
 
-        if hasSwitchStatements {
+        if hasSwitchStatements && !configuration.ignoresCaseStatements {
             return reduceSwitchComplexity(initialComplexity: complexity, file: file, dictionary: dictionary)
         }
 
@@ -104,15 +105,5 @@ public struct CyclomaticComplexityRule: ASTRule, ConfigurationProviderRule {
         let fallthroughCount = c.components(separatedBy: "fallthrough").count - 1
         return complexity - fallthroughCount
     }
-
-    private let complexityStatements: [StatementKind] = [
-        .forEach,
-        .if,
-        .case,
-        .guard,
-        .for,
-        .repeatWhile,
-        .while
-    ]
 
 }

@@ -22,20 +22,12 @@ public struct TypeNameRule: ASTRule, ConfigurationProviderRule {
         identifier: "type_name",
         name: "Type Name",
         description: "Type name should only contain alphanumeric characters, start with an " +
-                     "uppercase character and span between 3 and 40 characters in length.",
-        nonTriggeringExamples: TypeNameRuleExamples.swift3NonTriggeringExamples,
-        triggeringExamples: TypeNameRuleExamples.swift3TriggeringExamples
+        "uppercase character and span between 3 and 40 characters in length.",
+        nonTriggeringExamples: TypeNameRuleExamples.nonTriggeringExamples,
+        triggeringExamples: TypeNameRuleExamples.triggeringExamples
     )
 
-    private let typeKinds: [SwiftDeclarationKind] = {
-        let common = SwiftDeclarationKind.typeKinds()
-        switch SwiftVersion.current {
-        case .two:
-            return common + [.enumelement]
-        case .three:
-            return common
-        }
-    }()
+    private let typeKinds = SwiftDeclarationKind.typeKinds()
 
     public func validate(file: File) -> [StyleViolation] {
         return validateTypeAliasesAndAssociatedTypes(in: file) +
@@ -68,7 +60,7 @@ public struct TypeNameRule: ASTRule, ConfigurationProviderRule {
             let contents = file.contents.bridge()
             guard let name = contents.substringWithByteRange(start: nameToken.offset,
                                                              length: nameToken.length) else {
-                return []
+                                                                return []
             }
 
             return validate(name: name, file: file, offset: nameToken.offset)
@@ -82,22 +74,24 @@ public struct TypeNameRule: ASTRule, ConfigurationProviderRule {
         }
 
         let name = name.nameStrippingLeadingUnderscoreIfPrivate(dictionary)
-        if !CharacterSet.alphanumerics.isSuperset(ofCharactersIn: name) {
+        let containsAllowedSymbol = configuration.allowedSymbols.contains(where: name.contains)
+        if !containsAllowedSymbol && !CharacterSet.alphanumerics.isSuperset(ofCharactersIn: name) {
             return [StyleViolation(ruleDescription: type(of: self).description,
-               severity: .error,
-               location: Location(file: file, byteOffset: offset),
-               reason: "Type name should only contain alphanumeric characters: '\(name)'")]
-        } else if !name.substring(to: name.index(after: name.startIndex)).isUppercase() {
+                                   severity: .error,
+                                   location: Location(file: file, byteOffset: offset),
+                                   reason: "Type name should only contain alphanumeric characters: '\(name)'")]
+        } else if configuration.validatesStartWithLowercase &&
+            !name.substring(to: name.index(after: name.startIndex)).isUppercase() {
             return [StyleViolation(ruleDescription: type(of: self).description,
-               severity: .error,
-               location: Location(file: file, byteOffset: offset),
-               reason: "Type name should start with an uppercase character: '\(name)'")]
+                                   severity: .error,
+                                   location: Location(file: file, byteOffset: offset),
+                                   reason: "Type name should start with an uppercase character: '\(name)'")]
         } else if let severity = severity(forLength: name.characters.count) {
             return [StyleViolation(ruleDescription: type(of: self).description,
-               severity: severity,
-               location: Location(file: file, byteOffset: offset),
-               reason: "Type name should be between \(configuration.minLengthThreshold) and " +
-                    "\(configuration.maxLengthThreshold) characters long: '\(name)'")]
+                                   severity: severity,
+                                   location: Location(file: file, byteOffset: offset),
+                                   reason: "Type name should be between \(configuration.minLengthThreshold) and " +
+                "\(configuration.maxLengthThreshold) characters long: '\(name)'")]
         }
 
         return []

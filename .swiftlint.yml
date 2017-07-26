@@ -20,6 +20,8 @@ opt_in_rules:
   - object_literal
   - number_separator
   - prohibited_super_call
+  - fatal_error_message
+  - vertical_parameter_alignment_on_call
 
 file_header:
   required_pattern: |
@@ -30,6 +32,9 @@ file_header:
                     \/\/  Created by .*? on \d{1,2}\/\d{1,2}\/\d{2}\.
                     \/\/  Copyright © \d{4} Realm\. All rights reserved\.
                     \/\/
+identifier_name:
+  excluded:
+    - id
 line_length: 120
 number_separator:
   minimum_length: 5
