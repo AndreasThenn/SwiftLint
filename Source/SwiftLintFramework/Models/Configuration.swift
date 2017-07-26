@@ -202,13 +202,13 @@ public struct Configuration: Equatable {
         return (pathsForPath + includedPaths()).filter({ !excluded.contains($0) })
     }
 
-    public func excludedPaths() -> [String] {
+    public func excludedPaths(fileManager: LintableFileManager = FileManager.default) -> [String] {
         return excluded.flatMap {
             fileManager.filesToLint(inPath: $0, rootDirectory: rootPath)
         }
     }
 
-    public func includedPaths() -> [String] {
+    public func includedPaths(fileManager: LintableFileManager = FileManager.default) -> [String] {
         return included.flatMap {
             fileManager.filesToLint(inPath: $0, rootDirectory: rootPath)
         }
