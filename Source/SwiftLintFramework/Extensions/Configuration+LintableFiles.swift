@@ -20,15 +20,20 @@ extension Configuration {
         if path.isFile {
             return [path]
         }
-        let pathsForPath = included.isEmpty ? fileManager.filesToLint(inPath: path, rootDirectory: nil) : []
-        let excludedPaths = excluded.flatMap {
+        let pathsForPath = included.isEmpty ? fileManager.filesToLint(inPath: path, rootDirectory: rootPath) : []
+        let excluded = excludedPaths()
+        return (pathsForPath + includedPaths()).filter({ !excluded.contains($0) })
+    }
+    
+    public func excludedPaths(fileManager: LintableFileManager = FileManager.default) -> [String] {
+        return excluded.flatMap {
             fileManager.filesToLint(inPath: $0, rootDirectory: rootPath)
         }
-        let includedPaths = included.flatMap {
+    }
+    
+    public func includedPaths(fileManager: LintableFileManager = FileManager.default) -> [String] {
+        return included.flatMap {
             fileManager.filesToLint(inPath: $0, rootDirectory: rootPath)
-        }
-        return (pathsForPath + includedPaths).filter {
-            !excludedPaths.contains($0)
         }
     }
 }
