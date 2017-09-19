@@ -22,7 +22,8 @@ public struct TypeNameRule: ASTRule, ConfigurationProviderRule {
         identifier: "type_name",
         name: "Type Name",
         description: "Type name should only contain alphanumeric characters, start with an " +
-        "uppercase character and span between 3 and 40 characters in length.",
+                     "uppercase character and span between 3 and 40 characters in length.",
+        kind: .idiomatic,
         nonTriggeringExamples: TypeNameRuleExamples.nonTriggeringExamples,
         triggeringExamples: TypeNameRuleExamples.triggeringExamples
     )
@@ -60,7 +61,7 @@ public struct TypeNameRule: ASTRule, ConfigurationProviderRule {
             let contents = file.contents.bridge()
             guard let name = contents.substringWithByteRange(start: nameToken.offset,
                                                              length: nameToken.length) else {
-                                                                return []
+                return []
             }
 
             return validate(name: name, file: file, offset: nameToken.offset)

@@ -9,8 +9,8 @@
 import Foundation
 import SourceKittenFramework
 
-extension File {
-    fileprivate func violatingTrailingSemicolonRanges() -> [NSRange] {
+private extension File {
+    func violatingTrailingSemicolonRanges() -> [NSRange] {
         return match(pattern: "(;+([^\\S\\n]?)*)+;?$",
                      excludingSyntaxKinds: SyntaxKind.commentAndStringKinds())
     }
@@ -26,6 +26,7 @@ public struct TrailingSemicolonRule: CorrectableRule, ConfigurationProviderRule 
         identifier: "trailing_semicolon",
         name: "Trailing Semicolon",
         description: "Lines should not have trailing semicolons.",
+        kind: .idiomatic,
         nonTriggeringExamples: [ "let a = 0\n" ],
         triggeringExamples: [
             "let a = 0↓;\n",

@@ -17,6 +17,8 @@ This project adheres to the [Contributor Covenant Code of Conduct](https://realm
 By participating, you are expected to uphold this code. Please report
 unacceptable behavior to [info@realm.io](mailto:info@realm.io).
 
+> Language Switch: [中文](https://github.com/realm/SwiftLint/blob/master/README_CN.md), [한국어](https://github.com/realm/SwiftLint/blob/master/README_KR.md).
+
 ## Installation
 
 ### Using [Homebrew](http://brew.sh/):
@@ -53,7 +55,7 @@ running it.
 ### Compiling from source:
 
 You can also build from source by cloning this project and running
-`git submodule update --init --recursive; make install` (Xcode 8.0 or later).
+`git submodule update --init --recursive; make install` (Xcode 8.3 or later).
 
 ## Usage
 
@@ -62,7 +64,7 @@ You can also build from source by cloning this project and running
 To get a high-level overview of recommended ways to integrate SwiftLint into your project,
 we encourage you to watch this presentation or read the transcript:
 
-[![Presentation](assets/presentation.jpg)](https://realm.io/news/slug-jp-simard-swiftlint)
+[![Presentation](assets/presentation.jpg)](https://academy.realm.io/posts/slug-jp-simard-swiftlint/)
 
 ### Xcode
 
@@ -90,7 +92,8 @@ Alternatively, if you've installed SwiftLint via CocoaPods the script should loo
 To run `swiftlint autocorrect` on save in Xcode, install the
 [SwiftLintXcode](https://github.com/ypresto/SwiftLintXcode) plugin from Alcatraz.
 
-⚠ ️This plugin will not work with Xcode 8 without disabling SIP. This is not recommended.
+⚠ ️This plugin will not work with Xcode 8 or later without disabling SIP.
+This is not recommended.
 
 ### AppCode
 
@@ -104,6 +107,22 @@ The `autocorrect` action is available via `⌥⏎`.
 To integrate SwiftLint with [Atom](https://atom.io/), install the
 [`linter-swiftlint`](https://atom.io/packages/linter-swiftlint) package from
 APM.
+
+### fastlane
+
+You can use the [official swiftlint fastlane action](https://docs.fastlane.tools/actions/#swiftlint) to run SwiftLint as part of your fastlane process.
+
+```ruby
+swiftlint(
+  mode: :lint,                            # SwiftLint mode: :lint (default) or :autocorrect
+  executable: "Pods/SwiftLint/swiftlint", # The SwiftLint binary path (optional). Important if you've installed it via CocoaPods
+  output_file: "swiftlint.result.json",   # The path of the output file (optional)
+  reporter: "json",                       # The custom reporter to use (optional)
+  config_file: ".swiftlint-ci.yml",       # The path of the configuration file (optional)
+  ignore_exit_status: true                # Allow fastlane to continue even if SwiftLint returns a non-zero exit status
+)
+```
+
 
 ### Command Line
 
@@ -170,19 +189,35 @@ On Linux, SourceKit is expected to be located in
 `/usr/lib/libsourcekitdInProc.so` or specified by the `LINUX_SOURCEKIT_LIB_PATH`
 environment variable.
 
+### Swift Version Support
+
+Here's a reference of which SwiftLint version to use for a given Swift version.
+
+| Swift version | Last supported SwiftLint release |
+| ------------- | -------------------------------- |
+| Swift 1.x     | SwiftLint 0.1.2                  |
+| Swift 2.x     | SwiftLint 0.18.1                 |
+| Swift 3.x     | Latest                           |
+| Swift 4.x     | Latest                           |
+
 ## Rules
 
 Over 75 rules are included in SwiftLint and the Swift community (that's you!)
 continues to contribute more over time.
 [Pull requests](CONTRIBUTING.md) are encouraged.
 
-See the [Source/SwiftLintFramework/Rules](Source/SwiftLintFramework/Rules)
-directory to see the currently implemented rules.
+You can find an updated list of rules and more information about them
+in [Rules.md](Rules.md).
+
+You can also check [Source/SwiftLintFramework/Rules](Source/SwiftLintFramework/Rules)
+directory to see their implementation.
+
+### Opt-In Rules
 
 `opt_in_rules` are disabled by default (i.e., you have to explicitly enable them
 in your configuration file).
 
-Guidelines on when to implement a rule as opt-in:
+Guidelines on when to mark a rule as opt-in:
 
 * A rule that can have many false positives (e.g. `empty_count`)
 * A rule that is too slow
@@ -292,6 +327,9 @@ identifier_name:
 reporter: "xcode" # reporter type (xcode, json, csv, checkstyle, junit, html, emoji)
 ```
 
+You can also use environment variables in your configuration file,
+by using `${SOME_VARIABLE}` in a string.
+
 #### Defining Custom Rules
 
 You can define custom regex-based rules in you configuration file using the
@@ -300,8 +338,8 @@ following syntax:
 ```yaml
 custom_rules:
   pirates_beat_ninjas: # rule identifier
-    included: ".*.swift" # regex that defines paths to include during linting. optional.
-    excluded: ".*Test.swift" # regex that defines paths to exclude during linting. optional
+    included: ".*\\.swift" # regex that defines paths to include during linting. optional.
+    excluded: ".*Test\\.swift" # regex that defines paths to exclude during linting. optional
     name: "Pirates Beat Ninjas" # rule name. optional.
     regex: "([n,N]inja)" # matching pattern
     match_kinds: # SyntaxKinds to match. optional.

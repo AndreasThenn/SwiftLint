@@ -19,6 +19,7 @@ public struct ShorthandOperatorRule: ConfigurationProviderRule {
         identifier: "shorthand_operator",
         name: "Shorthand Operator",
         description: "Prefer shorthand operators (+=, -=, *=, /=) over doing the operation and assigning.",
+        kind: .style,
         nonTriggeringExamples: allOperators.flatMap { operation in
             [
                 "foo \(operation)= 1",
@@ -82,7 +83,7 @@ public struct ShorthandOperatorRule: ConfigurationProviderRule {
 
             // byteRanges will have the ranges of captured groups
             let byteRanges: [NSRange?] = (1..<match.numberOfRanges).map { rangeIdx in
-                let range = match.rangeAt(rangeIdx)
+                let range = match.range(at: rangeIdx)
                 guard range.location != NSNotFound else {
                     return nil
                 }

@@ -18,6 +18,7 @@ public struct FunctionParameterCountRule: ASTRule, ConfigurationProviderRule {
         identifier: "function_parameter_count",
         name: "Function Parameter Count",
         description: "Number of function parameters should be low.",
+        kind: .metrics,
         nonTriggeringExamples: [
             "init(a: Int, b: Int, c: Int, d: Int, e: Int, f: Int) {}",
             "init (a: Int, b: Int, c: Int, d: Int, e: Int, f: Int) {}",
@@ -103,8 +104,17 @@ public struct FunctionParameterCountRule: ASTRule, ConfigurationProviderRule {
     }
 
     fileprivate func defaultFunctionParameterCount(file: File, byteOffset: Int, byteLength: Int) -> Int {
+#if swift(>=4.0)
+        let substring = String(file.contents.bridge().substringWithByteRange(start: byteOffset, length: byteLength)!)
+        var count = 0
+        for char in substring where char == "=" {
+            count += 1
+        }
+        return count
+#else
         return file.contents.bridge().substringWithByteRange(start: byteOffset, length: byteLength)?
             .characters.filter { $0 == "=" }.count ?? 0
+#endif
     }
 
     fileprivate func functionIsInitializer(file: File, byteOffset: Int, byteLength: Int) -> Bool {

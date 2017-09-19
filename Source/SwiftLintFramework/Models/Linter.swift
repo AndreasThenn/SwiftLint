@@ -16,37 +16,84 @@ private struct LintResult {
     let deprecatedToValidIDPairs: [(String, String)]
 }
 
-extension Rule {
-    fileprivate func lint(file: File, regions: [Region], benchmark: Bool) -> LintResult? {
+private extension Rule {
+    static func superfluousDisableCommandViolations(regions: [Region],
+                                                    superfluousDisableCommandRule: SuperfluousDisableCommandRule?,
+                                                    allViolations: [StyleViolation]) -> [StyleViolation] {
+        guard !regions.isEmpty, let superfluousDisableCommandRule = superfluousDisableCommandRule else {
+            return []
+        }
+        let allIDs = description.allIdentifiers
+        let regionsDisablingCurrentRule = regions.filter { region in
+            return !region.disabledRuleIdentifiers.isDisjoint(with: allIDs)
+        }
+
+        return regionsDisablingCurrentRule.flatMap { region -> StyleViolation? in
+            guard region.isRuleEnabled(superfluousDisableCommandRule) else {
+                return nil
+            }
+
+            let noViolationsInDisabledRegion = !allViolations.contains { violation in
+                return region.contains(violation.location)
+            }
+            guard noViolationsInDisabledRegion else {
+                return nil
+            }
+
+            return StyleViolation(
+                ruleDescription: type(of: superfluousDisableCommandRule).description,
+                severity: superfluousDisableCommandRule.configuration.severity,
+                location: region.start,
+                reason: superfluousDisableCommandRule.reason(for: self))
+        }
+    }
+
+    func lint(file: File, regions: [Region], benchmark: Bool,
+              superfluousDisableCommandRule: SuperfluousDisableCommandRule?) -> LintResult? {
         if !(self is SourceKitFreeRule) && file.sourcekitdFailed {
             return nil
         }
+
+        let ruleID = Self.description.identifier
 
         let violations: [StyleViolation]
         let ruleTime: (String, Double)?
         if benchmark {
             let start = Date()
             violations = validate(file: file)
-            let id = type(of: self).description.identifier
-            ruleTime = (id, -start.timeIntervalSinceNow)
+            ruleTime = (ruleID, -start.timeIntervalSinceNow)
         } else {
             violations = validate(file: file)
             ruleTime = nil
         }
 
         let (disabledViolationsAndRegions, enabledViolationsAndRegions) = violations.map { violation in
-            return (violation, regions.first(where: { $0.contains(violation.location) }))
+            return (violation, regions.first { $0.contains(violation.location) })
         }.partitioned { _, region in
             return region?.isRuleEnabled(self) ?? true
         }
 
-        let enabledViolations = enabledViolationsAndRegions.map { $0.0 }
+        let superfluousDisableCommandViolations = Self.superfluousDisableCommandViolations(
+            regions: regions.count > 1 ? file.regions(restrictingRuleIdentifiers: [ruleID]) : regions,
+            superfluousDisableCommandRule: superfluousDisableCommandRule,
+            allViolations: violations
+        )
+
+        let enabledViolations: [StyleViolation]
+        if file.contents.hasPrefix("#!") { // if a violation happens on the same line as a shebang, ignore it
+            enabledViolations = enabledViolationsAndRegions.flatMap { violation, _ in
+                if violation.location.line == 1 { return nil }
+                return violation
+            }
+        } else {
+            enabledViolations = enabledViolationsAndRegions.map { $0.0 }
+        }
         let deprecatedToValidIDPairs = disabledViolationsAndRegions.flatMap { _, region -> [(String, String)] in
             let identifiers = region?.deprecatedAliasesDisabling(rule: self) ?? []
-            return identifiers.map { ($0, type(of: self).description.identifier) }
+            return identifiers.map { ($0, ruleID) }
         }
 
-        return LintResult(violations: enabledViolations, ruleTime: ruleTime,
+        return LintResult(violations: enabledViolations + superfluousDisableCommandViolations, ruleTime: ruleTime,
                           deprecatedToValidIDPairs: deprecatedToValidIDPairs)
     }
 }
@@ -75,8 +122,12 @@ public struct Linter {
             queuedPrintError("Most rules will be skipped because sourcekitd has failed.")
         }
         let regions = file.regions()
+        let superfluousDisableCommandRule = rules.first(where: {
+            $0 is SuperfluousDisableCommandRule
+        }) as? SuperfluousDisableCommandRule
         let validationResults = rules.parallelFlatMap {
-            $0.lint(file: self.file, regions: regions, benchmark: benchmark)
+            $0.lint(file: self.file, regions: regions, benchmark: benchmark,
+                    superfluousDisableCommandRule: superfluousDisableCommandRule)
         }
         let violations = validationResults.flatMap { $0.violations }
         let ruleTimes = validationResults.flatMap { $0.ruleTime }

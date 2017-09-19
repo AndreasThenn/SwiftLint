@@ -20,6 +20,7 @@ public struct OperatorUsageWhitespaceRule: OptInRule, CorrectableRule, Configura
         name: "Operator Usage Whitespace",
         description: "Operators should be surrounded by a single whitespace " +
                      "when they are being used.",
+        kind: .style,
         nonTriggeringExamples: [
             "let foo = 1 + 2\n",
             "let foo = 1 > 2\n",
@@ -31,12 +32,11 @@ public struct OperatorUsageWhitespaceRule: OptInRule, CorrectableRule, Configura
             "let range = 1...3\n",
             "let range = 1 ... 3\n",
             "let range = 1..<3\n",
-            "#if swift(>=3.0)\n",
+            "#if swift(>=3.0)\n    foo()\n#endif\n",
             "array.removeAtIndex(-200)\n",
             "let name = \"image-1\"\n",
             "button.setImage(#imageLiteral(resourceName: \"image-1\"), for: .normal)\n",
-            "let doubleValue = -9e-11\n",
-            "let red  = CGFloat((rgbaValue >> 24) & 0xff) / 255.0"
+            "let doubleValue = -9e-11\n"
         ],
         triggeringExamples: [
             "let foo = 1↓+2\n",

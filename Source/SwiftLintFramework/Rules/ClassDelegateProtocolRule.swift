@@ -18,6 +18,7 @@ public struct ClassDelegateProtocolRule: ASTRule, ConfigurationProviderRule {
         identifier: "class_delegate_protocol",
         name: "Class Delegate Protocol",
         description: "Delegate protocols should be class-only so they can be weakly referenced.",
+        kind: .lint,
         nonTriggeringExamples: [
             "protocol FooDelegate: class {}\n",
             "protocol FooDelegate: class, BarDelegate {}\n",
@@ -51,7 +52,7 @@ public struct ClassDelegateProtocolRule: ASTRule, ConfigurationProviderRule {
         // Check if @objc
         let objcAttributes: Set<String> = ["source.decl.attribute.objc",
                                            "source.decl.attribute.objc.name"]
-        let isObjc = !objcAttributes.intersection(dictionary.enclosedSwiftAttributes).isEmpty
+        let isObjc = !objcAttributes.isDisjoint(with: dictionary.enclosedSwiftAttributes)
         guard !isObjc else {
             return []
         }

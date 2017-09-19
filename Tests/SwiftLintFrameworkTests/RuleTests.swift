@@ -16,27 +16,35 @@ struct RuleWithLevelsMock: ConfigurationProviderRule {
     static let description = RuleDescription(identifier: "severity_level_mock",
                                              name: "",
                                              description: "",
+                                             kind: .style,
                                              deprecatedAliases: ["mock"])
+
     func validate(file: File) -> [StyleViolation] { return [] }
 }
 
 class RuleTests: XCTestCase {
 
     fileprivate struct RuleMock1: Rule {
+        var configurationDescription: String { return "N/A" }
+        static let description = RuleDescription(identifier: "RuleMock1", name: "",
+                                                 description: "", kind: .style)
+
         init() {}
         init(configuration: Any) throws { self.init() }
-        var configurationDescription: String { return "N/A" }
-        static let description = RuleDescription(identifier: "RuleMock1", name: "", description: "")
+
         func validate(file: File) -> [StyleViolation] {
             return []
         }
     }
 
     fileprivate struct RuleMock2: Rule {
+        var configurationDescription: String { return "N/A" }
+        static let description = RuleDescription(identifier: "RuleMock2", name: "",
+                                                 description: "", kind: .style)
+
         init() {}
         init(configuration: Any) throws { self.init() }
-        var configurationDescription: String { return "N/A" }
-        static let description = RuleDescription(identifier: "RuleMock2", name: "", description: "")
+
         func validate(file: File) -> [StyleViolation] {
             return []
         }
@@ -44,10 +52,10 @@ class RuleTests: XCTestCase {
 
     fileprivate struct RuleWithLevelsMock2: ConfigurationProviderRule {
         var configuration = SeverityLevelsConfiguration(warning: 2, error: 3)
-
         static let description = RuleDescription(identifier: "violation_level_mock2",
                                                  name: "",
-                                                 description: "")
+                                                 description: "", kind: .style)
+
         func validate(file: File) -> [StyleViolation] { return [] }
     }
 

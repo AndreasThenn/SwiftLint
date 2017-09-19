@@ -20,10 +20,17 @@ internal func regex(_ pattern: String,
 }
 
 extension File {
-    internal func regions() -> [Region] {
+    internal func regions(restrictingRuleIdentifiers: [String]? = nil) -> [Region] {
         var regions = [Region]()
         var disabledRules = Set<String>()
-        let commands = self.commands()
+        let commands: [Command]
+        if let restrictingRuleIdentifiers = restrictingRuleIdentifiers {
+            commands = self.commands().filter { command in
+                return command.ruleIdentifiers.contains(where: restrictingRuleIdentifiers.contains)
+            }
+        } else {
+            commands = self.commands()
+        }
         let commandPairs = zip(commands, Array(commands.dropFirst().map(Optional.init)) + [nil])
         for (command, nextCommand) in commandPairs {
             switch command.action {
@@ -244,6 +251,7 @@ extension File {
             fatalError("can't write file to \(path)")
         }
         contents = string
+        invalidateCache()
         lines = contents.bridge().lines()
     }
 
@@ -251,9 +259,9 @@ extension File {
         let fileRegions = regions()
         if fileRegions.isEmpty { return violatingRanges }
         let violatingRanges = violatingRanges.filter { range in
-            let region = fileRegions.first(where: {
+            let region = fileRegions.first {
                 $0.contains(Location(file: self, characterOffset: range.location))
-            })
+            }
             return region?.isRuleEnabled(rule) ?? true
         }
         return violatingRanges

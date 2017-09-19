@@ -25,6 +25,7 @@ public struct MarkRule: CorrectableRule, ConfigurationProviderRule {
         identifier: "mark",
         name: "Mark",
         description: "MARK comment should be in valid format. e.g. '// MARK: ...' or '// MARK: - ...'",
+        kind: .lint,
         nonTriggeringExamples: [
             "// MARK: good\n",
             "// MARK: - good\n",
@@ -50,7 +51,8 @@ public struct MarkRule: CorrectableRule, ConfigurationProviderRule {
             "↓// Mark: bad",
             "↓// MARK bad",
             "↓//MARK bad",
-            "↓// MARK - bad"
+            "↓// MARK - bad",
+            issue1029Example
         ],
         corrections: [
             "↓//MARK: comment": "// MARK: comment",
@@ -59,7 +61,8 @@ public struct MarkRule: CorrectableRule, ConfigurationProviderRule {
             "↓//  MARK: comment": "// MARK: comment",
             "↓//MARK: - comment": "// MARK: - comment",
             "↓// MARK:- comment": "// MARK: - comment",
-            "↓// MARK: -comment": "// MARK: - comment"
+            "↓// MARK: -comment": "// MARK: - comment",
+            issue1029Example: issue1029Correction
         ]
     )
 
@@ -122,7 +125,7 @@ public struct MarkRule: CorrectableRule, ConfigurationProviderRule {
                                           replaceString: "// MARK: - ",
                                           keepLastChar: true))
 
-        return result
+        return result.unique
     }
 
     private func correct(file: File,
@@ -159,3 +162,15 @@ public struct MarkRule: CorrectableRule, ConfigurationProviderRule {
         }
     }
 }
+
+private let issue1029Example = "↓//MARK:- Top-Level bad mark\n" +
+                               "↓//MARK:- Another bad mark\n" +
+                               "struct MarkTest {}\n" +
+                               "↓// MARK:- Bad mark\n" +
+                               "extension MarkTest {}\n"
+
+private let issue1029Correction = "// MARK: - Top-Level bad mark\n" +
+                                 "// MARK: - Another bad mark\n" +
+                                 "struct MarkTest {}\n" +
+                                 "// MARK: - Bad mark\n" +
+                                 "extension MarkTest {}\n"

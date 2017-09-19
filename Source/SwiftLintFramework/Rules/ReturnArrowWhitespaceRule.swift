@@ -20,6 +20,7 @@ public struct ReturnArrowWhitespaceRule: CorrectableRule, ConfigurationProviderR
         name: "Returning Whitespace",
         description: "Return arrow and return type should be separated by a single space or on a " +
                      "separate line.",
+        kind: .style,
         nonTriggeringExamples: [
             "func abc() -> Int {}\n",
             "func abc() -> [Int] {}\n",
@@ -77,7 +78,7 @@ public struct ReturnArrowWhitespaceRule: CorrectableRule, ConfigurationProviderR
             guard result.numberOfRanges > (replacementsByIndex.keys.max() ?? 0) else { break }
 
             for (index, string) in replacementsByIndex {
-                if let range = contents.nsrangeToIndexRange(result.rangeAt(index)) {
+                if let range = contents.nsrangeToIndexRange(result.range(at: index)) {
                     contents.replaceSubrange(range, with: string)
                     break
                 }

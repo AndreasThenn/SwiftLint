@@ -10,7 +10,15 @@ import SwiftLintFramework
 import XCTest
 
 // swiftlint:disable file_length
+// swiftlint:disable type_body_length
+
 class RulesTests: XCTestCase {
+
+    func testBlockBasedKVO() {
+        #if swift(>=3.2)
+            verifyRule(BlockBasedKVORule.description)
+        #endif
+    }
 
     func testClassDelegateProtocol() {
         verifyRule(ClassDelegateProtocolRule.description)
@@ -76,6 +84,10 @@ class RulesTests: XCTestCase {
         verifyRule(EmptyParenthesesWithTrailingClosureRule.description)
     }
 
+    func testExplicitEnumRawValue() {
+        verifyRule(ExplicitEnumRawValueRule.description)
+    }
+
     func testExplicitInit() {
         verifyRule(ExplicitInitRule.description)
     }
@@ -94,11 +106,6 @@ class RulesTests: XCTestCase {
 
     func testFatalErrorMessage() {
         verifyRule(FatalErrorMessageRule.description)
-    }
-
-    func testFileLength() {
-        verifyRule(FileLengthRule.description, commentDoesntViolate: false,
-                   testMultiByteOffsets: false)
     }
 
     func testFirstWhere() {
@@ -141,12 +148,21 @@ class RulesTests: XCTestCase {
         verifyRule(ImplicitReturnRule.description)
     }
 
+    func testIsDisjoint() {
+        verifyRule(IsDisjointRule.description)
+    }
+
+    func testJoinedDefaultParameter() {
+        verifyRule(JoinedDefaultParameterRule.description)
+    }
+
     func testLargeTuple() {
         verifyRule(LargeTupleRule.description)
     }
 
     func testLeadingWhitespace() {
-        verifyRule(LeadingWhitespaceRule.description, testMultiByteOffsets: false)
+        verifyRule(LeadingWhitespaceRule.description, skipDisableCommandTests: true,
+                   testMultiByteOffsets: false, testShebang: false)
     }
 
     func testLegacyCGGeometryFunctions() {
@@ -165,12 +181,20 @@ class RulesTests: XCTestCase {
         verifyRule(LegacyConstructorRule.description)
     }
 
+    func testLetVarWhitespace() {
+        verifyRule(LetVarWhitespaceRule.description)
+    }
+
     func testMark() {
-        verifyRule(MarkRule.description, commentDoesntViolate: false)
+        verifyRule(MarkRule.description, skipCommentTests: true)
     }
 
     func testMultilineParameters() {
         verifyRule(MultilineParametersRule.description)
+    }
+
+    func testMultipleClosuresWithTrailingClosure() {
+        verifyRule(MultipleClosuresWithTrailingClosureRule.description)
     }
 
     func testNesting() {
@@ -179,6 +203,10 @@ class RulesTests: XCTestCase {
 
     func testNoExtensionAccessModifierRule() {
         verifyRule(NoExtensionAccessModifierRule.description)
+    }
+
+    func testNoGroupingExtension() {
+        verifyRule(NoGroupingExtensionRule.description)
     }
 
     func testNotificationCenterDetachment() {
@@ -201,6 +229,10 @@ class RulesTests: XCTestCase {
         verifyRule(OperatorUsageWhitespaceRule.description)
     }
 
+    func testPatternMatchingKeywords() {
+        verifyRule(PatternMatchingKeywordsRule.description)
+    }
+
     func testPrivateOutlet() {
         verifyRule(PrivateOutletRule.description)
 
@@ -211,11 +243,8 @@ class RulesTests: XCTestCase {
             "class Foo {\n  @IBOutlet weak private(set) var label: UILabel?\n}\n",
             "class Foo {\n  @IBOutlet private(set) weak var label: UILabel?\n}\n"
         ]
-        let description = RuleDescription(identifier: baseDescription.identifier,
-                                          name: baseDescription.name,
-                                          description: baseDescription.description,
-                                          nonTriggeringExamples: nonTriggeringExamples,
-                                          triggeringExamples: baseDescription.triggeringExamples)
+
+        let description = baseDescription.with(nonTriggeringExamples: nonTriggeringExamples)
         verifyRule(description, ruleConfiguration: ["allow_private_set": true])
     }
 
@@ -229,6 +258,10 @@ class RulesTests: XCTestCase {
 
     func testProtocolPropertyAccessorsOrder() {
         verifyRule(ProtocolPropertyAccessorsOrderRule.description)
+    }
+
+    func testQuickDiscouragedCall() {
+        verifyRule(QuickDiscouragedCallRule.description)
     }
 
     func testRedundantDiscardableLet() {
@@ -259,6 +292,10 @@ class RulesTests: XCTestCase {
         verifyRule(ShorthandOperatorRule.description)
     }
 
+    func testSingleTestClass() {
+        verifyRule(SingleTestClassRule.description)
+    }
+
     func testSortedImports() {
         verifyRule(SortedImportsRule.description)
     }
@@ -272,12 +309,20 @@ class RulesTests: XCTestCase {
         verifyRule(StatementPositionRule.uncuddledDescription, ruleConfiguration: configuration)
     }
 
+    func testStrictFilePrivate() {
+        verifyRule(StrictFilePrivateRule.description)
+    }
+
     func testSwitchCaseOnNewline() {
         verifyRule(SwitchCaseOnNewlineRule.description)
     }
 
     func testSyntacticSugar() {
         verifyRule(SyntacticSugarRule.description)
+    }
+
+    func testTrailingClosure() {
+        verifyRule(TrailingClosureRule.description)
     }
 
     func testTrailingNewline() {
@@ -296,27 +341,18 @@ class RulesTests: XCTestCase {
         // The set of non-triggering examples is extended by a whitespace-indented empty line
         let baseDescription = TrailingWhitespaceRule.description
         let nonTriggeringExamples = baseDescription.nonTriggeringExamples + [" \n"]
-        let description = RuleDescription(identifier: baseDescription.identifier,
-                                          name: baseDescription.name,
-                                          description: baseDescription.description,
-                                          nonTriggeringExamples: nonTriggeringExamples,
-                                          triggeringExamples: baseDescription.triggeringExamples,
-                                          corrections: baseDescription.corrections)
+        let description = baseDescription.with(nonTriggeringExamples: nonTriggeringExamples)
+
         verifyRule(description,
                    ruleConfiguration: ["ignores_empty_lines": true, "ignores_comments": true])
 
         // Perform additional tests with the ignores_comments settings disabled.
         let triggeringComments = ["// \n", "let name: String // \n"]
-        let baseDescription2 = TrailingWhitespaceRule.description
-        let nonTriggeringExamples2 = baseDescription2.nonTriggeringExamples
+        let nonTriggeringExamples2 = baseDescription.nonTriggeringExamples
             .filter { !triggeringComments.contains($0) }
-        let triggeringExamples2 = baseDescription2.triggeringExamples + triggeringComments
-        let description2 = RuleDescription(identifier: baseDescription2.identifier,
-                                           name: baseDescription2.name,
-                                           description: baseDescription2.description,
-                                           nonTriggeringExamples: nonTriggeringExamples2,
-                                           triggeringExamples: triggeringExamples2,
-                                           corrections: baseDescription2.corrections)
+        let triggeringExamples2 = baseDescription.triggeringExamples + triggeringComments
+        let description2 = baseDescription.with(nonTriggeringExamples: nonTriggeringExamples2)
+                                          .with(triggeringExamples: triggeringExamples2)
         verifyRule(description2,
                    ruleConfiguration: ["ignores_empty_lines": false, "ignores_comments": false],
                    commentDoesntViolate: false)
@@ -324,6 +360,10 @@ class RulesTests: XCTestCase {
 
     func testTypeBodyLength() {
         verifyRule(TypeBodyLengthRule.description)
+    }
+
+    func testUnneededParenthesesInClosureArgument() {
+        verifyRule(UnneededParenthesesInClosureArgumentRule.description)
     }
 
     func testUnusedClosureParameter() {
@@ -356,5 +396,9 @@ class RulesTests: XCTestCase {
 
     func testWeakDelegate() {
         verifyRule(WeakDelegateRule.description)
+    }
+
+    func testXCTFailMessage() {
+        verifyRule(XCTFailMessageRule.description)
     }
 }
