@@ -5,7 +5,7 @@
 //  Created by JP Simard on 12/11/16.
 //  Copyright © 2016 Realm. All rights reserved.
 //
-// Generated using Sourcery 0.8.0 — https://github.com/krzysztofzablocki/Sourcery
+// Generated using Sourcery 0.10.1 — https://github.com/krzysztofzablocki/Sourcery
 // DO NOT EDIT
 
 @testable import SwiftLintFrameworkTests
@@ -66,11 +66,15 @@ extension ConfigurationTests {
         ("testDisabledRulesWithUnknownRule", testDisabledRulesWithUnknownRule),
         ("testDuplicatedRules", testDuplicatedRules),
         ("testExcludedPaths", testExcludedPaths),
+        ("testLintablePaths", testLintablePaths),
         ("testIsEqualTo", testIsEqualTo),
         ("testIsNotEqualTo", testIsNotEqualTo),
         ("testCustomConfiguration", testCustomConfiguration),
         ("testConfigurationWithSwiftFileAsRoot", testConfigurationWithSwiftFileAsRoot),
         ("testConfigurationWithSwiftFileAsRootAndCustomConfiguration", testConfigurationWithSwiftFileAsRootAndCustomConfiguration),
+        ("testIndentationTabs", testIndentationTabs),
+        ("testIndentationSpaces", testIndentationSpaces),
+        ("testIndentationFallback", testIndentationFallback),
         ("testConfiguresCorrectlyFromDict", testConfiguresCorrectlyFromDict),
         ("testConfigureFallsBackCorrectly", testConfigureFallsBackCorrectly),
         ("testConfiguresCorrectlyFromDeprecatedAlias", testConfiguresCorrectlyFromDeprecatedAlias),
@@ -172,6 +176,7 @@ extension GenericTypeNameRuleTests {
     static var allTests: [(String, (GenericTypeNameRuleTests) -> () throws -> Void)] = [
         ("testGenericTypeName", testGenericTypeName),
         ("testGenericTypeNameWithAllowedSymbols", testGenericTypeNameWithAllowedSymbols),
+        ("testGenericTypeNameWithAllowedSymbolsAndViolation", testGenericTypeNameWithAllowedSymbolsAndViolation),
         ("testGenericTypeNameWithIgnoreStartWithLowercase", testGenericTypeNameWithIgnoreStartWithLowercase)
     ]
 }
@@ -180,6 +185,7 @@ extension IdentifierNameRuleTests {
     static var allTests: [(String, (IdentifierNameRuleTests) -> () throws -> Void)] = [
         ("testIdentifierName", testIdentifierName),
         ("testIdentifierNameWithAllowedSymbols", testIdentifierNameWithAllowedSymbols),
+        ("testIdentifierNameWithAllowedSymbolsAndViolation", testIdentifierNameWithAllowedSymbolsAndViolation),
         ("testIdentifierNameWithIgnoreStartWithLowercase", testIdentifierNameWithIgnoreStartWithLowercase)
     ]
 }
@@ -247,7 +253,16 @@ extension LinterCacheTests {
         ("testEnabledRulesChangedOrAddedOrRemovedCausesAllFilesToBeReLinted", testEnabledRulesChangedOrAddedOrRemovedCausesAllFilesToBeReLinted),
         ("testWhitelistRulesChangedOrAddedOrRemovedCausesAllFilesToBeReLinted", testWhitelistRulesChangedOrAddedOrRemovedCausesAllFilesToBeReLinted),
         ("testRuleConfigurationChangedOrAddedOrRemovedCausesAllFilesToBeReLinted", testRuleConfigurationChangedOrAddedOrRemovedCausesAllFilesToBeReLinted),
-        ("testSwiftVersionChangedRemovedCausesAllFilesToBeReLinted", testSwiftVersionChangedRemovedCausesAllFilesToBeReLinted)
+        ("testSwiftVersionChangedRemovedCausesAllFilesToBeReLinted", testSwiftVersionChangedRemovedCausesAllFilesToBeReLinted),
+        ("testDetectSwiftVersion", testDetectSwiftVersion)
+    ]
+}
+
+extension MultilineArgumentsRuleTests {
+    static var allTests: [(String, (MultilineArgumentsRuleTests) -> () throws -> Void)] = [
+        ("testMultilineArgumentsWithDefaultConfiguration", testMultilineArgumentsWithDefaultConfiguration),
+        ("testMultilineArgumentsWithWithNextLine", testMultilineArgumentsWithWithNextLine),
+        ("testMultilineArgumentsWithWithSameLine", testMultilineArgumentsWithWithSameLine)
     ]
 }
 
@@ -297,6 +312,23 @@ extension ReporterTests {
         ("testCheckstyleReporter", testCheckstyleReporter),
         ("testJunitReporter", testJunitReporter),
         ("testHTMLReporter", testHTMLReporter)
+    ]
+}
+
+extension RequiredEnumCaseRuleTestCase {
+    static var allTests: [(String, (RequiredEnumCaseRuleTestCase) -> () throws -> Void)] = [
+        ("testRequiredCaseHashValue", testRequiredCaseHashValue),
+        ("testRequiredCaseEquatableReturnsTrue", testRequiredCaseEquatableReturnsTrue),
+        ("testRequiredCaseEquatableReturnsFalseBecauseOfDifferentName", testRequiredCaseEquatableReturnsFalseBecauseOfDifferentName),
+        ("testConsoleDescriptionReturnsAllConfiguredProtocols", testConsoleDescriptionReturnsAllConfiguredProtocols),
+        ("testConsoleDescriptionReturnsNoConfiguredProtocols", testConsoleDescriptionReturnsNoConfiguredProtocols),
+        ("testRegisterProtocolCasesRegistersCasesWithSpecifiedSeverity", testRegisterProtocolCasesRegistersCasesWithSpecifiedSeverity),
+        ("testRegisterProtocols", testRegisterProtocols),
+        ("testApplyThrowsErrorBecausePassedConfigurationCantBeCast", testApplyThrowsErrorBecausePassedConfigurationCantBeCast),
+        ("testApplyRegistersProtocols", testApplyRegistersProtocols),
+        ("testEqualsReturnsTrue", testEqualsReturnsTrue),
+        ("testEqualsReturnsFalseBecauseProtocolsArentEqual", testEqualsReturnsFalseBecauseProtocolsArentEqual),
+        ("testEqualsReturnsFalseBecauseSeverityIsntEqual", testEqualsReturnsFalseBecauseSeverityIsntEqual)
     ]
 }
 
@@ -356,15 +388,18 @@ extension RulesTests {
         ("testComma", testComma),
         ("testCompilerProtocolInit", testCompilerProtocolInit),
         ("testConditionalReturnsOnNewline", testConditionalReturnsOnNewline),
-        ("testContainsOverFirstNotNilRule", testContainsOverFirstNotNilRule),
+        ("testContainsOverFirstNotNil", testContainsOverFirstNotNil),
         ("testControlStatement", testControlStatement),
         ("testCyclomaticComplexity", testCyclomaticComplexity),
         ("testDiscardedNotificationCenterObserver", testDiscardedNotificationCenterObserver),
+        ("testDiscouragedObjectLiteral", testDiscouragedObjectLiteral),
+        ("testDiscouragedOptionalBoolean", testDiscouragedOptionalBoolean),
         ("testDynamicInline", testDynamicInline),
         ("testEmptyCount", testEmptyCount),
         ("testEmptyEnumArguments", testEmptyEnumArguments),
         ("testEmptyParameters", testEmptyParameters),
         ("testEmptyParenthesesWithTrailingClosure", testEmptyParenthesesWithTrailingClosure),
+        ("testExplicitACL", testExplicitACL),
         ("testExplicitEnumRawValue", testExplicitEnumRawValue),
         ("testExplicitInit", testExplicitInit),
         ("testExplicitTopLevelACL", testExplicitTopLevelACL),
@@ -391,31 +426,39 @@ extension RulesTests {
         ("testLegacyConstant", testLegacyConstant),
         ("testLegacyConstructor", testLegacyConstructor),
         ("testLetVarWhitespace", testLetVarWhitespace),
+        ("testLiteralExpressionEndIdentation", testLiteralExpressionEndIdentation),
         ("testMark", testMark),
         ("testMultilineParameters", testMultilineParameters),
         ("testMultipleClosuresWithTrailingClosure", testMultipleClosuresWithTrailingClosure),
         ("testNesting", testNesting),
-        ("testNoExtensionAccessModifierRule", testNoExtensionAccessModifierRule),
+        ("testNoExtensionAccessModifier", testNoExtensionAccessModifier),
         ("testNoGroupingExtension", testNoGroupingExtension),
         ("testNotificationCenterDetachment", testNotificationCenterDetachment),
         ("testNimbleOperator", testNimbleOperator),
         ("testOpeningBrace", testOpeningBrace),
         ("testOperatorFunctionWhitespace", testOperatorFunctionWhitespace),
         ("testOperatorUsageWhitespace", testOperatorUsageWhitespace),
+        ("testOverrideInExtension", testOverrideInExtension),
         ("testPatternMatchingKeywords", testPatternMatchingKeywords),
+        ("testPrefixedTopLevelConstant", testPrefixedTopLevelConstant),
+        ("testPrivateAction", testPrivateAction),
         ("testPrivateOutlet", testPrivateOutlet),
         ("testPrivateUnitTest", testPrivateUnitTest),
         ("testProhibitedSuper", testProhibitedSuper),
         ("testProtocolPropertyAccessorsOrder", testProtocolPropertyAccessorsOrder),
         ("testQuickDiscouragedCall", testQuickDiscouragedCall),
+        ("testQuickDiscouragedFocusedTest", testQuickDiscouragedFocusedTest),
+        ("testQuickDiscouragedPendingTest", testQuickDiscouragedPendingTest),
         ("testRedundantDiscardableLet", testRedundantDiscardableLet),
         ("testRedundantNilCoalescing", testRedundantNilCoalescing),
         ("testRedundantOptionalInitialization", testRedundantOptionalInitialization),
         ("testRedundantStringEnumValue", testRedundantStringEnumValue),
         ("testRedundantVoidReturn", testRedundantVoidReturn),
+        ("testRequiredEnumCase", testRequiredEnumCase),
         ("testReturnArrowWhitespace", testReturnArrowWhitespace),
         ("testShorthandOperator", testShorthandOperator),
         ("testSingleTestClass", testSingleTestClass),
+        ("testSortedFirstLast", testSortedFirstLast),
         ("testSortedImports", testSortedImports),
         ("testStatementPosition", testStatementPosition),
         ("testStatementPositionUncuddled", testStatementPositionUncuddled),
@@ -428,6 +471,7 @@ extension RulesTests {
         ("testTrailingSemicolon", testTrailingSemicolon),
         ("testTrailingWhitespace", testTrailingWhitespace),
         ("testTypeBodyLength", testTypeBodyLength),
+        ("testUnneededBreakInSwitch", testUnneededBreakInSwitch),
         ("testUnneededParenthesesInClosureArgument", testUnneededParenthesesInClosureArgument),
         ("testUnusedClosureParameter", testUnusedClosureParameter),
         ("testUnusedEnumerated", testUnusedEnumerated),
@@ -437,7 +481,8 @@ extension RulesTests {
         ("testVoidReturn", testVoidReturn),
         ("testSuperCall", testSuperCall),
         ("testWeakDelegate", testWeakDelegate),
-        ("testXCTFailMessage", testXCTFailMessage)
+        ("testXCTFailMessage", testXCTFailMessage),
+        ("testYodaCondition", testYodaCondition)
     ]
 }
 
@@ -468,6 +513,7 @@ extension TypeNameRuleTests {
     static var allTests: [(String, (TypeNameRuleTests) -> () throws -> Void)] = [
         ("testTypeName", testTypeName),
         ("testTypeNameWithAllowedSymbols", testTypeNameWithAllowedSymbols),
+        ("testTypeNameWithAllowedSymbolsAndViolation", testTypeNameWithAllowedSymbolsAndViolation),
         ("testTypeNameWithIgnoreStartWithLowercase", testTypeNameWithIgnoreStartWithLowercase)
     ]
 }
@@ -530,11 +576,13 @@ XCTMain([
     testCase(LineLengthConfigurationTests.allTests),
     testCase(LineLengthRuleTests.allTests),
     testCase(LinterCacheTests.allTests),
+    testCase(MultilineArgumentsRuleTests.allTests),
     testCase(NumberSeparatorRuleTests.allTests),
     testCase(ObjectLiteralRuleTests.allTests),
     testCase(PrivateOverFilePrivateRuleTests.allTests),
     testCase(RegionTests.allTests),
     testCase(ReporterTests.allTests),
+    testCase(RequiredEnumCaseRuleTestCase.allTests),
     testCase(RuleConfigurationsTests.allTests),
     testCase(RuleTests.allTests),
     testCase(RulesTests.allTests),

@@ -33,12 +33,8 @@ extension String {
     internal func nameStrippingLeadingUnderscoreIfPrivate(_ dict: [String: SourceKitRepresentable]) -> String {
         if let aclString = dict.accessibility,
            let acl = AccessControlLevel(identifier: aclString),
-            acl.isPrivate && characters.first == "_" {
-#if swift(>=4.0)
+            acl.isPrivate && first == "_" {
             return String(self[index(after: startIndex)...])
-#else
-            return substring(from: index(after: startIndex))
-#endif
         }
         return self
     }
@@ -49,24 +45,19 @@ extension String {
         if let indexRange = nsrangeToIndexRange(nsrange) {
             return String(self[indexRange])
         }
-        fatalError("invalid range")
+        queuedFatalError("invalid range")
     }
 
     internal func substring(from: Int, length: Int? = nil) -> String {
         if let length = length {
             return self[from..<from + length]
         }
-        let index = characters.index(startIndex, offsetBy: from, limitedBy: endIndex)!
-#if swift(>=4.0)
-        return String(self[index...])
-#else
-        return substring(from: index)
-#endif
+        return String(self[index(startIndex, offsetBy: from, limitedBy: endIndex)!...])
     }
 
     internal func lastIndex(of search: String) -> Int? {
         if let range = range(of: search, options: [.literal, .backwards]) {
-            return characters.distance(from: startIndex, to: range.lowerBound)
+            return distance(from: startIndex, to: range.lowerBound)
         }
         return nil
     }
@@ -79,10 +70,13 @@ extension String {
                                  limitedBy: utf16.endIndex) ?? utf16.endIndex
         let to16 = utf16.index(from16, offsetBy: nsrange.length,
                                limitedBy: utf16.endIndex) ?? utf16.endIndex
-        if let from = Index(from16, within: self), let to = Index(to16, within: self) {
-            return from..<to
+
+        guard let fromIndex = Index(from16, within: self),
+            let toIndex = Index(to16, within: self) else {
+                return nil
         }
-        return nil
+
+        return fromIndex..<toIndex
     }
 
     public func absolutePathStandardized() -> String {

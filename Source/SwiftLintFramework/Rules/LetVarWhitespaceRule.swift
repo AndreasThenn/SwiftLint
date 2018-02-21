@@ -33,17 +33,16 @@ public struct LetVarWhitespaceRule: ConfigurationProviderRule, OptInRule {
             "class C {\n\t@objc\n\tfunc a() {}\n}",
             "class C {\n\tvar x = 0\n\tlazy\n\tvar y = 0\n}\n",
             "@available(OSX, introduced: 10.6)\n@available(*, deprecated)\nvar x = 0\n",
-            "// swiftlint:disable superfluous_disable_command\n// swiftlint:disable force_cast\n\nlet x = bar as! Bar"
+            "// swiftlint:disable superfluous_disable_command\n// swiftlint:disable force_cast\n\nlet x = bar as! Bar",
+            "var x: Int {\n\tlet a = 0\n\treturn a\n}\n" // don't trigger on local vars
         ],
         triggeringExamples: [
             "var x = 1\n↓x = 2\n",
             "\na = 5\n↓var x = 1\n",
-            // This case doesn't work because of an apparent limitation in SourceKit
-            // "var x: Int {\n\tlet a = 0\n\t↓return a\n}\n",
             "struct X {\n\tlet a\n\t↓func x() {}\n}\n",
             "var x = 0\n↓@objc func f() {}\n",
             "var x = 0\n↓@objc\n\tfunc f() {}\n",
-            "@objc func f() {}\nvar x = 0\n"
+            "@objc func f() {\n}\n↓var x = 0\n"
         ]
     )
 
@@ -113,7 +112,7 @@ public struct LetVarWhitespaceRule: ConfigurationProviderRule, OptInRule {
         let content = file.lines[line].content
         let startIndex = content.rangeOfCharacter(from: CharacterSet.whitespaces.inverted)?.lowerBound
                          ?? content.startIndex
-        let offset = content.characters.distance(from: content.startIndex, to: startIndex)
+        let offset = content.distance(from: content.startIndex, to: startIndex)
         let location = Location(file: file, characterOffset: offset + file.lines[line].range.location)
 
         violations.append(StyleViolation(ruleDescription: LetVarWhitespaceRule.description,
@@ -212,16 +211,18 @@ public struct LetVarWhitespaceRule: ConfigurationProviderRule, OptInRule {
     // Collects all the line numbers containing attributes but not declarations
     // other than let/var
     private func attributeLineNumbers(file: File) -> Set<Int> {
-        let matches = file.match(pattern: "[@_a-z]+", with: [.attributeBuiltin])
-        let matchLines = matches.map { file.line(offset: $0.location) }
-
-        return Set<Int>(matchLines)
+        return Set(file.syntaxMap.tokens.flatMap({ token in
+            if token.type == SyntaxKind.attributeBuiltin.rawValue {
+                return file.line(byteOffset: token.offset)
+            }
+            return nil
+        }))
     }
 }
 
 private extension SwiftDeclarationKind {
     // The various kinds of let/var declarations
-    static let varKinds: [SwiftDeclarationKind] = [.varGlobal, .varClass, .varLocal, .varStatic, .varInstance]
+    static let varKinds: [SwiftDeclarationKind] = [.varGlobal, .varClass, .varStatic, .varInstance]
     // Declarations other than let & var that can have attributes
     static let nonVarAttributableKinds: [SwiftDeclarationKind] = [
         .class, .struct,

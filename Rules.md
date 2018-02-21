@@ -19,11 +19,14 @@
 * [Cyclomatic Complexity](#cyclomatic-complexity)
 * [Discarded Notification Center Observer](#discarded-notification-center-observer)
 * [Discouraged Direct Initialization](#discouraged-direct-initialization)
+* [Discouraged Object Literal](#discouraged-object-literal)
+* [Discouraged Optional Boolean](#discouraged-optional-boolean)
 * [Dynamic Inline](#dynamic-inline)
 * [Empty Count](#empty-count)
 * [Empty Enum Arguments](#empty-enum-arguments)
 * [Empty Parameters](#empty-parameters)
 * [Empty Parentheses with Trailing Closure](#empty-parentheses-with-trailing-closure)
+* [Explicit ACL](#explicit-acl)
 * [Explicit Enum Raw Value](#explicit-enum-raw-value)
 * [Explicit Init](#explicit-init)
 * [Explicit Top Level ACL](#explicit-top-level-acl)
@@ -55,7 +58,9 @@
 * [Legacy NSGeometry Functions](#legacy-nsgeometry-functions)
 * [Variable Declaration Whitespace](#variable-declaration-whitespace)
 * [Line Length](#line-length)
+* [Literal Expression End Indentation](#literal-expression-end-indentation)
 * [Mark](#mark)
+* [Multiline Arguments](#multiline-arguments)
 * [Multiline Parameters](#multiline-parameters)
 * [Multiple Closures with Trailing Closure](#multiple-closures-with-trailing-closure)
 * [Nesting](#nesting)
@@ -69,21 +74,28 @@
 * [Operator Usage Whitespace](#operator-usage-whitespace)
 * [Operator Function Whitespace](#operator-function-whitespace)
 * [Overridden methods call super](#overridden-methods-call-super)
+* [Override in Extension](#override-in-extension)
 * [Pattern Matching Keywords](#pattern-matching-keywords)
+* [Prefixed Top-Level Constant](#prefixed-top-level-constant)
+* [Private Actions](#private-actions)
 * [Private Outlets](#private-outlets)
 * [Private over fileprivate](#private-over-fileprivate)
 * [Private Unit Test](#private-unit-test)
 * [Prohibited calls to super](#prohibited-calls-to-super)
 * [Protocol Property Accessors Order](#protocol-property-accessors-order)
 * [Quick Discouraged Call](#quick-discouraged-call)
+* [Quick Discouraged Focused Test](#quick-discouraged-focused-test)
+* [Quick Discouraged Pending Test](#quick-discouraged-pending-test)
 * [Redundant Discardable Let](#redundant-discardable-let)
 * [Redundant Nil Coalescing](#redundant-nil-coalescing)
 * [Redundant Optional Initialization](#redundant-optional-initialization)
 * [Redundant String Enum Value](#redundant-string-enum-value)
 * [Redundant Void Return](#redundant-void-return)
+* [Required Enum Case](#required-enum-case)
 * [Returning Whitespace](#returning-whitespace)
 * [Shorthand Operator](#shorthand-operator)
 * [Single Test Class](#single-test-class)
+* [Min or Max over Sorted First or Last](#min-or-max-over-sorted-first-or-last)
 * [Sorted Imports](#sorted-imports)
 * [Statement Position](#statement-position)
 * [Strict fileprivate](#strict-fileprivate)
@@ -99,6 +111,7 @@
 * [Trailing Whitespace](#trailing-whitespace)
 * [Type Body Length](#type-body-length)
 * [Type Name](#type-name)
+* [Unneeded Break in Switch](#unneeded-break-in-switch)
 * [Unneeded Parentheses in Closure Argument](#unneeded-parentheses-in-closure-argument)
 * [Unused Closure Parameter](#unused-closure-parameter)
 * [Unused Enumerated](#unused-enumerated)
@@ -110,6 +123,7 @@
 * [Void Return](#void-return)
 * [Weak Delegate](#weak-delegate)
 * [XCTFail Message](#xctfail-message)
+* [Yoda condition rule](#yoda-condition-rule)
 --------
 
 ## Array Init
@@ -157,6 +171,11 @@ foo.map { $0! }
 
 ```swift
 foo.map { $0! /* force unwrap */ }
+
+```
+
+```swift
+foo.something { RouteMapper.map($0) }
 
 ```
 
@@ -1149,6 +1168,18 @@ object.method(5, y: "string")
 
 ```
 
+```swift
+func abc() { def(ghi: jkl) }
+```
+
+```swift
+func abc(def: Void) { ghi(jkl: mno) }
+```
+
+```swift
+class ABC { let def = ghi(jkl: mno) } }
+```
+
 </details>
 <details>
 <summary>Triggering Examples</summary>
@@ -1371,6 +1402,18 @@ object.method(x↓:5, y: "string")
 ```swift
 object.method(x↓:  5, y: "string")
 
+```
+
+```swift
+func abc() { def(ghi↓:jkl) }
+```
+
+```swift
+func abc(def: Void) { ghi(jkl↓:mno) }
+```
+
+```swift
+class ABC { let def = ghi(jkl↓:mno) } }
 ```
 
 </details>
@@ -1624,6 +1667,11 @@ let first = myList.first { $0 % 2 == 0 }
 
 ```
 
+```swift
+(↓myList.first { $0 % 2 == 0 }) != nil
+
+```
+
 </details>
 
 
@@ -1634,7 +1682,7 @@ Identifier | Enabled by default | Supports autocorrection | Kind
 --- | --- | --- | ---
 `control_statement` | Enabled | No | style
 
-if,for,while,do statements shouldn't wrap their conditionals in parentheses.
+if,for,while,do,catch statements shouldn't wrap their conditionals or arguments in parentheses.
 
 ### Examples
 
@@ -1714,6 +1762,16 @@ do { ; } while condition {
 ```swift
 switch foo {
 
+```
+
+```swift
+do {
+} catch let error as NSError {
+}
+```
+
+```swift
+foo().catch(all: true) {}
 ```
 
 </details>
@@ -1798,6 +1856,12 @@ do { ; } ↓while (condition) {
 ```swift
 ↓switch (foo) {
 
+```
+
+```swift
+do {
+} ↓catch(let error as NSError) {
+}
 ```
 
 </details>
@@ -2030,6 +2094,692 @@ let foo = bar(bundle: ↓Bundle.init(), device: ↓UIDevice.init())
 
 
 
+## Discouraged Object Literal
+
+Identifier | Enabled by default | Supports autocorrection | Kind 
+--- | --- | --- | ---
+`discouraged_object_literal` | Disabled | No | idiomatic
+
+Prefer initializers over object literals.
+
+### Examples
+
+<details>
+<summary>Non Triggering Examples</summary>
+
+```swift
+let image = UIImage(named: aVariable)
+```
+
+```swift
+let image = UIImage(named: "interpolated \(variable)")
+```
+
+```swift
+let color = UIColor(red: value, green: value, blue: value, alpha: 1)
+```
+
+```swift
+let image = NSImage(named: aVariable)
+```
+
+```swift
+let image = NSImage(named: "interpolated \(variable)")
+```
+
+```swift
+let color = NSColor(red: value, green: value, blue: value, alpha: 1)
+```
+
+</details>
+<details>
+<summary>Triggering Examples</summary>
+
+```swift
+let image = ↓#imageLiteral(resourceName: "image.jpg")
+```
+
+```swift
+let color = ↓#colorLiteral(red: 0.9607843161, green: 0.7058823705, blue: 0.200000003, alpha: 1)
+```
+
+</details>
+
+
+
+## Discouraged Optional Boolean
+
+Identifier | Enabled by default | Supports autocorrection | Kind 
+--- | --- | --- | ---
+`discouraged_optional_boolean` | Disabled | No | idiomatic
+
+Prefer non-optional booleans over optional booleans.
+
+### Examples
+
+<details>
+<summary>Non Triggering Examples</summary>
+
+```swift
+var foo: Bool
+```
+
+```swift
+var foo: [String: Bool]
+```
+
+```swift
+var foo: [Bool]
+```
+
+```swift
+let foo: Bool = true
+```
+
+```swift
+let foo: Bool = false
+```
+
+```swift
+let foo: [String: Bool] = [:]
+```
+
+```swift
+let foo: [Bool] = []
+```
+
+```swift
+var foo: Bool { return true }
+```
+
+```swift
+let foo: Bool { return false }()
+```
+
+```swift
+func foo() -> Bool {}
+```
+
+```swift
+func foo() -> [String: Bool] {}
+```
+
+```swift
+func foo() -> ([Bool]) -> String {}
+```
+
+```swift
+func foo(input: Bool = true) {}
+```
+
+```swift
+func foo(input: [String: Bool] = [:]) {}
+```
+
+```swift
+func foo(input: [Bool] = []) {}
+```
+
+```swift
+class Foo {
+	func foo() -> Bool {}
+}
+```
+
+```swift
+class Foo {
+	func foo() -> [String: Bool] {}
+}
+```
+
+```swift
+class Foo {
+	func foo() -> ([Bool]) -> String {}
+}
+```
+
+```swift
+struct Foo {
+	func foo() -> Bool {}
+}
+```
+
+```swift
+struct Foo {
+	func foo() -> [String: Bool] {}
+}
+```
+
+```swift
+struct Foo {
+	func foo() -> ([Bool]) -> String {}
+}
+```
+
+```swift
+enum Foo {
+	func foo() -> Bool {}
+}
+```
+
+```swift
+enum Foo {
+	func foo() -> [String: Bool] {}
+}
+```
+
+```swift
+enum Foo {
+	func foo() -> ([Bool]) -> String {}
+}
+```
+
+```swift
+class Foo {
+	func foo(input: Bool = true) {}
+}
+```
+
+```swift
+class Foo {
+	func foo(input: [String: Bool] = [:]) {}
+}
+```
+
+```swift
+class Foo {
+	func foo(input: [Bool] = []) {}
+}
+```
+
+```swift
+struct Foo {
+	func foo(input: Bool = true) {}
+}
+```
+
+```swift
+struct Foo {
+	func foo(input: [String: Bool] = [:]) {}
+}
+```
+
+```swift
+struct Foo {
+	func foo(input: [Bool] = []) {}
+}
+```
+
+```swift
+enum Foo {
+	func foo(input: Bool = true) {}
+}
+```
+
+```swift
+enum Foo {
+	func foo(input: [String: Bool] = [:]) {}
+}
+```
+
+```swift
+enum Foo {
+	func foo(input: [Bool] = []) {}
+}
+```
+
+</details>
+<details>
+<summary>Triggering Examples</summary>
+
+```swift
+var foo: ↓Bool?
+```
+
+```swift
+var foo: [String: ↓Bool?]
+```
+
+```swift
+var foo: [↓Bool?]
+```
+
+```swift
+let foo: ↓Bool? = nil
+```
+
+```swift
+let foo: [String: ↓Bool?] = [:]
+```
+
+```swift
+let foo: [↓Bool?] = []
+```
+
+```swift
+let foo = ↓Optional.some(false)
+```
+
+```swift
+let foo = ↓Optional.some(true)
+```
+
+```swift
+var foo: ↓Bool? { return nil }
+```
+
+```swift
+let foo: ↓Bool? { return nil }()
+```
+
+```swift
+func foo() -> ↓Bool? {}
+```
+
+```swift
+func foo() -> [String: ↓Bool?] {}
+```
+
+```swift
+func foo() -> [↓Bool?] {}
+```
+
+```swift
+static func foo() -> ↓Bool? {}
+```
+
+```swift
+static func foo() -> [String: ↓Bool?] {}
+```
+
+```swift
+static func foo() -> [↓Bool?] {}
+```
+
+```swift
+func foo() -> (↓Bool?) -> String {}
+```
+
+```swift
+func foo() -> ([Int]) -> ↓Bool? {}
+```
+
+```swift
+func foo(input: ↓Bool?) {}
+```
+
+```swift
+func foo(input: [String: ↓Bool?]) {}
+```
+
+```swift
+func foo(input: [↓Bool?]) {}
+```
+
+```swift
+static func foo(input: ↓Bool?) {}
+```
+
+```swift
+static func foo(input: [String: ↓Bool?]) {}
+```
+
+```swift
+static func foo(input: [↓Bool?]) {}
+```
+
+```swift
+class Foo {
+	var foo: ↓Bool?
+}
+```
+
+```swift
+class Foo {
+	var foo: [String: ↓Bool?]
+}
+```
+
+```swift
+class Foo {
+	let foo: ↓Bool? = nil
+}
+```
+
+```swift
+class Foo {
+	let foo: [String: ↓Bool?] = [:]
+}
+```
+
+```swift
+class Foo {
+	let foo: [↓Bool?] = []
+}
+```
+
+```swift
+struct Foo {
+	var foo: ↓Bool?
+}
+```
+
+```swift
+struct Foo {
+	var foo: [String: ↓Bool?]
+}
+```
+
+```swift
+struct Foo {
+	let foo: ↓Bool? = nil
+}
+```
+
+```swift
+struct Foo {
+	let foo: [String: ↓Bool?] = [:]
+}
+```
+
+```swift
+struct Foo {
+	let foo: [↓Bool?] = []
+}
+```
+
+```swift
+class Foo {
+	var foo: ↓Bool? { return nil }
+}
+```
+
+```swift
+class Foo {
+	let foo: ↓Bool? { return nil }()
+}
+```
+
+```swift
+struct Foo {
+	var foo: ↓Bool? { return nil }
+}
+```
+
+```swift
+struct Foo {
+	let foo: ↓Bool? { return nil }()
+}
+```
+
+```swift
+enum Foo {
+	var foo: ↓Bool? { return nil }
+}
+```
+
+```swift
+enum Foo {
+	let foo: ↓Bool? { return nil }()
+}
+```
+
+```swift
+class Foo {
+	func foo() -> ↓Bool? {}
+}
+```
+
+```swift
+class Foo {
+	func foo() -> [String: ↓Bool?] {}
+}
+```
+
+```swift
+class Foo {
+	func foo() -> [↓Bool?] {}
+}
+```
+
+```swift
+class Foo {
+	static func foo() -> ↓Bool? {}
+}
+```
+
+```swift
+class Foo {
+	static func foo() -> [String: ↓Bool?] {}
+}
+```
+
+```swift
+class Foo {
+	static func foo() -> [↓Bool?] {}
+}
+```
+
+```swift
+class Foo {
+	func foo() -> (↓Bool?) -> String {}
+}
+```
+
+```swift
+class Foo {
+	func foo() -> ([Int]) -> ↓Bool? {}
+}
+```
+
+```swift
+struct Foo {
+	func foo() -> ↓Bool? {}
+}
+```
+
+```swift
+struct Foo {
+	func foo() -> [String: ↓Bool?] {}
+}
+```
+
+```swift
+struct Foo {
+	func foo() -> [↓Bool?] {}
+}
+```
+
+```swift
+struct Foo {
+	static func foo() -> ↓Bool? {}
+}
+```
+
+```swift
+struct Foo {
+	static func foo() -> [String: ↓Bool?] {}
+}
+```
+
+```swift
+struct Foo {
+	static func foo() -> [↓Bool?] {}
+}
+```
+
+```swift
+struct Foo {
+	func foo() -> (↓Bool?) -> String {}
+}
+```
+
+```swift
+struct Foo {
+	func foo() -> ([Int]) -> ↓Bool? {}
+}
+```
+
+```swift
+enum Foo {
+	func foo() -> ↓Bool? {}
+}
+```
+
+```swift
+enum Foo {
+	func foo() -> [String: ↓Bool?] {}
+}
+```
+
+```swift
+enum Foo {
+	func foo() -> [↓Bool?] {}
+}
+```
+
+```swift
+enum Foo {
+	static func foo() -> ↓Bool? {}
+}
+```
+
+```swift
+enum Foo {
+	static func foo() -> [String: ↓Bool?] {}
+}
+```
+
+```swift
+enum Foo {
+	static func foo() -> [↓Bool?] {}
+}
+```
+
+```swift
+enum Foo {
+	func foo() -> (↓Bool?) -> String {}
+}
+```
+
+```swift
+enum Foo {
+	func foo() -> ([Int]) -> ↓Bool? {}
+}
+```
+
+```swift
+class Foo {
+	func foo(input: ↓Bool?) {}
+}
+```
+
+```swift
+class Foo {
+	func foo(input: [String: ↓Bool?]) {}
+}
+```
+
+```swift
+class Foo {
+	func foo(input: [↓Bool?]) {}
+}
+```
+
+```swift
+class Foo {
+	static func foo(input: ↓Bool?) {}
+}
+```
+
+```swift
+class Foo {
+	static func foo(input: [String: ↓Bool?]) {}
+}
+```
+
+```swift
+class Foo {
+	static func foo(input: [↓Bool?]) {}
+}
+```
+
+```swift
+struct Foo {
+	func foo(input: ↓Bool?) {}
+}
+```
+
+```swift
+struct Foo {
+	func foo(input: [String: ↓Bool?]) {}
+}
+```
+
+```swift
+struct Foo {
+	func foo(input: [↓Bool?]) {}
+}
+```
+
+```swift
+struct Foo {
+	static func foo(input: ↓Bool?) {}
+}
+```
+
+```swift
+struct Foo {
+	static func foo(input: [String: ↓Bool?]) {}
+}
+```
+
+```swift
+struct Foo {
+	static func foo(input: [↓Bool?]) {}
+}
+```
+
+```swift
+enum Foo {
+	func foo(input: ↓Bool?) {}
+}
+```
+
+```swift
+enum Foo {
+	func foo(input: [String: ↓Bool?]) {}
+}
+```
+
+```swift
+enum Foo {
+	func foo(input: [↓Bool?]) {}
+}
+```
+
+```swift
+enum Foo {
+	static func foo(input: ↓Bool?) {}
+}
+```
+
+```swift
+enum Foo {
+	static func foo(input: [String: ↓Bool?]) {}
+}
+```
+
+```swift
+enum Foo {
+	static func foo(input: [↓Bool?]) {}
+}
+```
+
+</details>
+
+
+
 ## Dynamic Inline
 
 Identifier | Enabled by default | Supports autocorrection | Kind 
@@ -2219,6 +2969,18 @@ switch (foo, bar) {
 }
 ```
 
+```swift
+switch foo {
+    case (let f as () -> String)?: break
+}
+```
+
+```swift
+switch foo {
+    default: break
+}
+```
+
 </details>
 <details>
 <summary>Triggering Examples</summary>
@@ -2394,6 +3156,121 @@ UIView.animateWithDuration(0.3, animations: {
 [1, 2].map↓(  ) { number in
  number + 1 
 }
+
+```
+
+</details>
+
+
+
+## Explicit ACL
+
+Identifier | Enabled by default | Supports autocorrection | Kind 
+--- | --- | --- | ---
+`explicit_acl` | Disabled | No | idiomatic
+
+All declarations should specify Access Control Level keywords explicitly.
+
+### Examples
+
+<details>
+<summary>Non Triggering Examples</summary>
+
+```swift
+internal enum A {}
+
+```
+
+```swift
+public final class B {}
+
+```
+
+```swift
+private struct C {}
+
+```
+
+```swift
+internal enum A {
+ internal enum B {}
+}
+```
+
+```swift
+internal final class Foo {}
+```
+
+```swift
+internal
+class Foo {  private let bar = 5 }
+```
+
+```swift
+internal func a() { let a =  }
+
+```
+
+```swift
+private func a() { func innerFunction() { } }
+```
+
+```swift
+private enum Foo { enum Bar { } }
+```
+
+```swift
+private struct C { let d = 5 }
+```
+
+```swift
+internal protocol A {
+    func b()
+}
+```
+
+```swift
+internal protocol A {
+    var b: Int
+}
+```
+
+```swift
+internal class A { deinit {} }
+```
+
+</details>
+<details>
+<summary>Triggering Examples</summary>
+
+```swift
+enum A {}
+
+```
+
+```swift
+final class B {}
+
+```
+
+```swift
+internal struct C { let d = 5 }
+
+```
+
+```swift
+public struct C { let d = 5 }
+
+```
+
+```swift
+func a() {}
+
+```
+
+```swift
+internal let a = 0
+func b() {}
 
 ```
 
@@ -4201,6 +5078,11 @@ match(pattern: pattern).filter { $0.first == .identifier }
 
 ```
 
+```swift
+(myList.filter { $0 == 1 }.suffix(2)).first
+
+```
+
 </details>
 <details>
 <summary>Triggering Examples</summary>
@@ -4233,6 +5115,11 @@ match(pattern: pattern).filter { $0.first == .identifier }
 ```swift
 ↓myList.filter({ $0 % 2 == 0 })
 .first
+
+```
+
+```swift
+(↓myList.filter { $0 == 1 }).first
 
 ```
 
@@ -4314,6 +5201,15 @@ for user in users {
 ```swift
 for user in users {
    if user.id == 1 && user.age > 18 { }
+}
+
+```
+
+```swift
+for (index, value) in array.enumerated() {
+   if case .valueB(_) = value {
+       return index
+   }
 }
 
 ```
@@ -4460,6 +5356,18 @@ private var myProperty: (Void -> Void)!
 
 ```swift
 func foo(_ options: [AnyHashable: Any]!) {
+```
+
+```swift
+func foo() -> [Int]!
+```
+
+```swift
+func foo() -> [AnyHashable: Any]!
+```
+
+```swift
+func foo() -> [Int]! { return [] }
 ```
 
 </details>
@@ -6304,6 +7212,14 @@ var x = 0
 let x = bar as! Bar
 ```
 
+```swift
+var x: Int {
+	let a = 0
+	return a
+}
+
+```
+
 </details>
 <details>
 <summary>Triggering Examples</summary>
@@ -6343,8 +7259,9 @@ var x = 0
 ```
 
 ```swift
-@objc func f() {}
-var x = 0
+@objc func f() {
+}
+↓var x = 0
 
 ```
 
@@ -6397,6 +7314,95 @@ Lines should not span too many characters.
 ```swift
 #imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")#imageLiteral(resourceName: "image.jpg")
 
+```
+
+</details>
+
+
+
+## Literal Expression End Indentation
+
+Identifier | Enabled by default | Supports autocorrection | Kind 
+--- | --- | --- | ---
+`literal_expression_end_indentation` | Disabled | No | style
+
+Array and dictionary literal end should have the same indentation as the line that started it.
+
+### Examples
+
+<details>
+<summary>Non Triggering Examples</summary>
+
+```swift
+[1, 2, 3]
+```
+
+```swift
+[1,
+ 2
+]
+```
+
+```swift
+[
+   1,
+   2
+]
+```
+
+```swift
+[
+   1,
+   2]
+
+```
+
+```swift
+   let x = [
+       1,
+       2
+   ]
+```
+
+```swift
+[key: 2, key2: 3]
+```
+
+```swift
+[key: 1,
+ key2: 2
+]
+```
+
+```swift
+[
+   key: 0,
+   key2: 20
+]
+```
+
+</details>
+<details>
+<summary>Triggering Examples</summary>
+
+```swift
+let x = [
+   1,
+   2
+   ↓]
+```
+
+```swift
+   let x = [
+       1,
+       2
+↓]
+```
+
+```swift
+let x = [
+   key: value
+   ↓]
 ```
 
 </details>
@@ -6522,6 +7528,131 @@ struct MarkTest {}
 ↓// MARK:- Bad mark
 extension MarkTest {}
 
+```
+
+</details>
+
+
+
+## Multiline Arguments
+
+Identifier | Enabled by default | Supports autocorrection | Kind 
+--- | --- | --- | ---
+`multiline_arguments` | Disabled | No | style
+
+Arguments should be either on the same line, or one per line.
+
+### Examples
+
+<details>
+<summary>Non Triggering Examples</summary>
+
+```swift
+foo()
+```
+
+```swift
+foo(
+    
+)
+```
+
+```swift
+foo { }
+```
+
+```swift
+foo {
+    
+}
+```
+
+```swift
+foo(0)
+```
+
+```swift
+foo(0, 1)
+```
+
+```swift
+foo(0, 1) { }
+```
+
+```swift
+foo(0, param1: 1)
+```
+
+```swift
+foo(0, param1: 1) { }
+```
+
+```swift
+foo(param1: 1)
+```
+
+```swift
+foo(param1: 1) { }
+```
+
+```swift
+foo(param1: 1, param2: true) { }
+```
+
+```swift
+foo(param1: 1, param2: true, param3: [3]) { }
+```
+
+```swift
+foo(param1: 1, param2: true, param3: [3]) {
+    bar()
+}
+```
+
+```swift
+foo(param1: 1,
+    param2: true,
+    param3: [3])
+```
+
+```swift
+foo(
+    param1: 1, param2: true, param3: [3]
+)
+```
+
+```swift
+foo(
+    param1: 1,
+    param2: true,
+    param3: [3]
+)
+```
+
+</details>
+<details>
+<summary>Triggering Examples</summary>
+
+```swift
+foo(0,
+    param1: 1, ↓param2: true, ↓param3: [3])
+```
+
+```swift
+foo(0, ↓param1: 1,
+    param2: true, ↓param3: [3])
+```
+
+```swift
+foo(0, ↓param1: 1, ↓param2: true,
+    param3: [3])
+```
+
+```swift
+foo(
+    0, ↓param1: 1,
+    param2: true, ↓param3: [3]
+)
 ```
 
 </details>
@@ -6789,6 +7920,70 @@ class Foo {
 }
 ```
 
+```swift
+class Foo {
+   class func foo(param1: Int,
+                  param2: Bool,
+                  param3: @escaping (Int, Int) -> Void = { _, _ in }) { }
+}
+```
+
+```swift
+class Foo {
+   class func foo(param1: Int,
+                  param2: Bool,
+                  param3: @escaping (Int) -> Void = { _ in }) { }
+}
+```
+
+```swift
+class Foo {
+   class func foo(param1: Int,
+                  param2: Bool,
+                  param3: @escaping ((Int) -> Void)? = nil) { }
+}
+```
+
+```swift
+class Foo {
+   class func foo(param1: Int,
+                  param2: Bool,
+                  param3: @escaping ((Int) -> Void)? = { _ in }) { }
+}
+```
+
+```swift
+class Foo {
+   class func foo(param1: Int,
+                  param2: @escaping ((Int) -> Void)? = { _ in },
+                  param3: Bool) { }
+}
+```
+
+```swift
+class Foo {
+   class func foo(param1: Int,
+                  param2: @escaping ((Int) -> Void)? = { _ in },
+                  param3: @escaping (Int, Int) -> Void = { _, _ in }) { }
+}
+```
+
+```swift
+class Foo {
+   class func foo(param1: Int,
+                  param2: Bool,
+                  param3: @escaping (Int) -> Void = { (x: Int) in }) { }
+}
+```
+
+```swift
+class Foo {
+   class func foo(param1: Int,
+                  param2: Bool,
+                  param3: @escaping (Int, (Int) -> Void) -> Void = { (x: Int, f: (Int) -> Void) in }) { }
+}
+```
+
 </details>
 <details>
 <summary>Triggering Examples</summary>
@@ -6923,6 +8118,20 @@ class Foo {
 class Foo {
    class func ↓foo(param1: Int, param2: Bool,
                    param3: [String]) { }
+}
+```
+
+```swift
+class Foo {
+   class func ↓foo(param1: Int,
+                  param2: Bool, param3: @escaping (Int, Int) -> Void = { _, _ in }) { }
+}
+```
+
+```swift
+class Foo {
+   class func ↓foo(param1: Int,
+                  param2: Bool, param3: @escaping (Int) -> Void = { (x: Int) in }) { }
 }
 ```
 
@@ -8261,6 +9470,80 @@ class VC: UIViewController {
 
 
 
+## Override in Extension
+
+Identifier | Enabled by default | Supports autocorrection | Kind 
+--- | --- | --- | ---
+`override_in_extension` | Disabled | No | lint
+
+Extensions shouldn't override declarations.
+
+### Examples
+
+<details>
+<summary>Non Triggering Examples</summary>
+
+```swift
+extension Person {
+  var age: Int { return 42 }
+}
+
+```
+
+```swift
+extension Person {
+  func celebrateBirthday() {}
+}
+
+```
+
+```swift
+class Employee: Person {
+  override func celebrateBirthday() {}
+}
+
+```
+
+```swift
+class Foo: NSObject {}
+extension Foo {
+    override var description: String { return "" }
+}
+
+```
+
+```swift
+struct Foo {
+    class Bar: NSObject {}
+}
+extension Foo.Bar {
+    override var description: String { return "" }
+}
+
+```
+
+</details>
+<details>
+<summary>Triggering Examples</summary>
+
+```swift
+extension Person {
+  override ↓var age: Int { return 42 }
+}
+
+```
+
+```swift
+extension Person {
+  override ↓func celebrateBirthday() {}
+}
+
+```
+
+</details>
+
+
+
 ## Pattern Matching Keywords
 
 Identifier | Enabled by default | Supports autocorrection | Kind 
@@ -8378,6 +9661,265 @@ switch foo {
 switch foo {
     case (.yamlParsing(↓var x), .yamlParsing(↓var y)): break
 }
+```
+
+</details>
+
+
+
+## Prefixed Top-Level Constant
+
+Identifier | Enabled by default | Supports autocorrection | Kind 
+--- | --- | --- | ---
+`prefixed_toplevel_constant` | Disabled | No | style
+
+Top-level constants should be prefixed by `k`.
+
+### Examples
+
+<details>
+<summary>Non Triggering Examples</summary>
+
+```swift
+private let kFoo = 20.0
+```
+
+```swift
+public let kFoo = false
+```
+
+```swift
+internal let kFoo = "Foo"
+```
+
+```swift
+let kFoo = true
+```
+
+```swift
+struct Foo {
+   let bar = 20.0
+}
+```
+
+```swift
+private var foo = 20.0
+```
+
+```swift
+public var foo = false
+```
+
+```swift
+internal var foo = "Foo"
+```
+
+```swift
+var foo = true
+```
+
+```swift
+var foo = true, bar = true
+```
+
+```swift
+var foo = true, let kFoo = true
+```
+
+```swift
+let
+   kFoo = true
+```
+
+```swift
+var foo: Int {
+   return a + b
+}
+```
+
+```swift
+let kFoo = {
+   return a + b
+}()
+```
+
+</details>
+<details>
+<summary>Triggering Examples</summary>
+
+```swift
+private let ↓Foo = 20.0
+```
+
+```swift
+public let ↓Foo = false
+```
+
+```swift
+internal let ↓Foo = "Foo"
+```
+
+```swift
+let ↓Foo = true
+```
+
+```swift
+let ↓foo = 2, ↓bar = true
+```
+
+```swift
+var foo = true, let ↓Foo = true
+```
+
+```swift
+let
+    ↓foo = true
+```
+
+```swift
+let ↓foo = {
+   return a + b
+}()
+```
+
+</details>
+
+
+
+## Private Actions
+
+Identifier | Enabled by default | Supports autocorrection | Kind 
+--- | --- | --- | ---
+`private_action` | Disabled | No | lint
+
+IBActions should be private.
+
+### Examples
+
+<details>
+<summary>Non Triggering Examples</summary>
+
+```swift
+class Foo {
+	@IBAction private func barButtonTapped(_ sender: UIButton) {}
+}
+
+```
+
+```swift
+struct Foo {
+	@IBAction private func barButtonTapped(_ sender: UIButton) {}
+}
+
+```
+
+```swift
+class Foo {
+	@IBAction fileprivate func barButtonTapped(_ sender: UIButton) {}
+}
+
+```
+
+```swift
+struct Foo {
+	@IBAction fileprivate func barButtonTapped(_ sender: UIButton) {}
+}
+
+```
+
+```swift
+private extension Foo {
+	@IBAction func barButtonTapped(_ sender: UIButton) {}
+}
+
+```
+
+```swift
+fileprivate extension Foo {
+	@IBAction func barButtonTapped(_ sender: UIButton) {}
+}
+
+```
+
+</details>
+<details>
+<summary>Triggering Examples</summary>
+
+```swift
+class Foo {
+	@IBAction ↓func barButtonTapped(_ sender: UIButton) {}
+}
+
+```
+
+```swift
+struct Foo {
+	@IBAction ↓func barButtonTapped(_ sender: UIButton) {}
+}
+
+```
+
+```swift
+class Foo {
+	@IBAction public ↓func barButtonTapped(_ sender: UIButton) {}
+}
+
+```
+
+```swift
+struct Foo {
+	@IBAction public ↓func barButtonTapped(_ sender: UIButton) {}
+}
+
+```
+
+```swift
+class Foo {
+	@IBAction internal ↓func barButtonTapped(_ sender: UIButton) {}
+}
+
+```
+
+```swift
+struct Foo {
+	@IBAction internal ↓func barButtonTapped(_ sender: UIButton) {}
+}
+
+```
+
+```swift
+extension Foo {
+	@IBAction ↓func barButtonTapped(_ sender: UIButton) {}
+}
+
+```
+
+```swift
+extension Foo {
+	@IBAction public ↓func barButtonTapped(_ sender: UIButton) {}
+}
+
+```
+
+```swift
+extension Foo {
+	@IBAction internal ↓func barButtonTapped(_ sender: UIButton) {}
+}
+
+```
+
+```swift
+public extension Foo {
+	@IBAction ↓func barButtonTapped(_ sender: UIButton) {}
+}
+
+```
+
+```swift
+internal extension Foo {
+	@IBAction ↓func barButtonTapped(_ sender: UIButton) {}
+}
+
 ```
 
 </details>
@@ -8838,6 +10380,96 @@ class TotoTests: QuickSpec {
 
 ```
 
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       xcontext("foo") {
+           afterEach { toto.append(foo) }
+       }
+   }
+}
+
+```
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       xdescribe("foo") {
+           afterEach { toto.append(foo) }
+       }
+   }
+}
+
+```
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       describe("foo") {
+           xit("does something") {
+               let foo = Foo()
+               foo.toto()
+           }
+       }
+   }
+}
+
+```
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       fcontext("foo") {
+           afterEach { toto.append(foo) }
+       }
+   }
+}
+
+```
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       fdescribe("foo") {
+           afterEach { toto.append(foo) }
+       }
+   }
+}
+
+```
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       describe("foo") {
+           fit("does something") {
+               let foo = Foo()
+               foo.toto()
+           }
+       }
+   }
+}
+
+```
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       fitBehavesLike("foo")
+   }
+}
+
+```
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       xitBehavesLike("foo")
+   }
+}
+
+```
+
 </details>
 <details>
 <summary>Triggering Examples</summary>
@@ -8965,6 +10597,259 @@ class TotoTests: QuickSpec {
        sharedExamples("foo") {
            ↓foo()
        }
+   }
+}
+
+```
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       xdescribe("foo") {
+           let foo = ↓Foo()
+       }
+       fdescribe("foo") {
+           let foo = ↓Foo()
+       }
+   }
+}
+
+```
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       xcontext("foo") {
+           let foo = ↓Foo()
+       }
+       fcontext("foo") {
+           let foo = ↓Foo()
+       }
+   }
+}
+
+```
+
+</details>
+
+
+
+## Quick Discouraged Focused Test
+
+Identifier | Enabled by default | Supports autocorrection | Kind 
+--- | --- | --- | ---
+`quick_discouraged_focused_test` | Disabled | No | lint
+
+Discouraged focused test. Other tests won't run while this one is focused.
+
+### Examples
+
+<details>
+<summary>Non Triggering Examples</summary>
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       describe("foo") {
+           describe("bar") { } 
+           context("bar") {
+               it("bar") { }
+           }
+           it("bar") { }
+           itBehavesLike("bar")
+       }
+   }
+}
+
+```
+
+</details>
+<details>
+<summary>Triggering Examples</summary>
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       ↓fdescribe("foo") { }
+   }
+}
+
+```
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       ↓fcontext("foo") { }
+   }
+}
+
+```
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       ↓fit("foo") { }
+   }
+}
+
+```
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       describe("foo") {
+           ↓fit("bar") { }
+       }
+   }
+}
+
+```
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       context("foo") {
+           ↓fit("bar") { }
+       }
+   }
+}
+
+```
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       describe("foo") {
+           context("bar") {
+               ↓fit("toto") { }
+           }
+       }
+   }
+}
+
+```
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       ↓fitBehavesLike("foo")
+   }
+}
+
+```
+
+</details>
+
+
+
+## Quick Discouraged Pending Test
+
+Identifier | Enabled by default | Supports autocorrection | Kind 
+--- | --- | --- | ---
+`quick_discouraged_pending_test` | Disabled | No | lint
+
+Discouraged pending test. This test won't run while it's marked as pending.
+
+### Examples
+
+<details>
+<summary>Non Triggering Examples</summary>
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       describe("foo") {
+           describe("bar") { } 
+           context("bar") {
+               it("bar") { }
+           }
+           it("bar") { }
+           itBehavesLike("bar")
+       }
+   }
+}
+
+```
+
+</details>
+<details>
+<summary>Triggering Examples</summary>
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       ↓xdescribe("foo") { }
+   }
+}
+
+```
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       ↓xcontext("foo") { }
+   }
+}
+
+```
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       ↓xit("foo") { }
+   }
+}
+
+```
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       describe("foo") {
+           ↓xit("bar") { }
+       }
+   }
+}
+
+```
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       context("foo") {
+           ↓xit("bar") { }
+       }
+   }
+}
+
+```
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       describe("foo") {
+           context("bar") {
+               ↓xit("toto") { }
+           }
+       }
+   }
+}
+
+```
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       ↓pending("foo")
+   }
+}
+
+```
+
+```swift
+class TotoTests: QuickSpec {
+   override func spec() {
+       ↓xitBehavesLike("foo")
    }
 }
 
@@ -9337,6 +11222,81 @@ protocol Foo {
  func foo()↓ -> ()
 }
 
+```
+
+</details>
+
+
+
+## Required Enum Case
+
+Identifier | Enabled by default | Supports autocorrection | Kind 
+--- | --- | --- | ---
+`required_enum_case` | Disabled | No | lint
+
+Enums conforming to a specified protocol must implement a specific case(s).
+
+### Examples
+
+<details>
+<summary>Non Triggering Examples</summary>
+
+```swift
+enum MyNetworkResponse: String, NetworkResponsable {
+    case success, error, notConnected 
+}
+```
+
+```swift
+enum MyNetworkResponse: String, NetworkResponsable {
+    case success, error, notConnected(error: Error) 
+}
+```
+
+```swift
+enum MyNetworkResponse: String, NetworkResponsable {
+    case success
+    case error
+    case notConnected
+}
+```
+
+```swift
+enum MyNetworkResponse: String, NetworkResponsable {
+    case success
+    case error
+    case notConnected(error: Error)
+}
+```
+
+</details>
+<details>
+<summary>Triggering Examples</summary>
+
+```swift
+enum MyNetworkResponse: String, NetworkResponsable {
+    case success, error 
+}
+```
+
+```swift
+enum MyNetworkResponse: String, NetworkResponsable {
+    case success, error 
+}
+```
+
+```swift
+enum MyNetworkResponse: String, NetworkResponsable {
+    case success
+    case error
+}
+```
+
+```swift
+enum MyNetworkResponse: String, NetworkResponsable {
+    case success
+    case error
+}
 ```
 
 </details>
@@ -9781,11 +11741,122 @@ class TotoTests {  }
 
 
 
+## Min or Max over Sorted First or Last
+
+Identifier | Enabled by default | Supports autocorrection | Kind 
+--- | --- | --- | ---
+`sorted_first_last` | Disabled | No | performance
+
+Prefer using `min()` or `max()` over `sorted().first` or `sorted().last`
+
+### Examples
+
+<details>
+<summary>Non Triggering Examples</summary>
+
+```swift
+let min = myList.min()
+
+```
+
+```swift
+let min = myList.min(by: { $0 < $1 })
+
+```
+
+```swift
+let min = myList.min(by: >)
+
+```
+
+```swift
+let min = myList.max()
+
+```
+
+```swift
+let min = myList.max(by: { $0 < $1 })
+
+```
+
+</details>
+<details>
+<summary>Triggering Examples</summary>
+
+```swift
+↓myList.sorted().first
+
+```
+
+```swift
+↓myList.sorted(by: { $0.description < $1.description }).first
+
+```
+
+```swift
+↓myList.sorted(by: >).first
+
+```
+
+```swift
+↓myList.map { $0 + 1 }.sorted().first
+
+```
+
+```swift
+↓myList.sorted(by: someFunction).first
+
+```
+
+```swift
+↓myList.map { $0 + 1 }.sorted { $0.description < $1.description }.first
+
+```
+
+```swift
+↓myList.sorted().last
+
+```
+
+```swift
+↓myList.sorted().last?.something()
+
+```
+
+```swift
+↓myList.sorted(by: { $0.description < $1.description }).last
+
+```
+
+```swift
+↓myList.map { $0 + 1 }.sorted().last
+
+```
+
+```swift
+↓myList.sorted(by: someFunction).last
+
+```
+
+```swift
+↓myList.map { $0 + 1 }.sorted { $0.description < $1.description }.last
+
+```
+
+```swift
+↓myList.map { $0 + 1 }.sorted { $0.first < $1.first }.last
+
+```
+
+</details>
+
+
+
 ## Sorted Imports
 
 Identifier | Enabled by default | Supports autocorrection | Kind 
 --- | --- | --- | ---
-`sorted_imports` | Disabled | No | style
+`sorted_imports` | Disabled | Yes | style
 
 Imports should be sorted.
 
@@ -9811,6 +11882,37 @@ import labc
 import Ldef
 ```
 
+```swift
+import BBB
+// comment
+import AAA
+import CCC
+```
+
+```swift
+@testable import AAA
+import   CCC
+```
+
+```swift
+import AAA
+@testable import   CCC
+```
+
+```swift
+import EEE.A
+import FFF.B
+#if os(Linux)
+import DDD.A
+import EEE.B
+#else
+import CCC
+import DDD.B
+#endif
+import AAA
+import BBB
+```
+
 </details>
 <details>
 <summary>Triggering Examples</summary>
@@ -9820,6 +11922,37 @@ import AAA
 import ZZZ
 import ↓BBB
 import CCC
+```
+
+```swift
+import DDD
+// comment
+import CCC
+import ↓AAA
+```
+
+```swift
+@testable import CCC
+import   ↓AAA
+```
+
+```swift
+import CCC
+@testable import   ↓AAA
+```
+
+```swift
+import FFF.B
+import ↓EEE.A
+#if os(Linux)
+import DDD.A
+import EEE.B
+#else
+import DDD.B
+import ↓CCC
+#endif
+import AAA
+import BBB
 ```
 
 </details>
@@ -13989,63 +16122,63 @@ case value
 <summary>Triggering Examples</summary>
 
 ```swift
-↓class myType {}
+class ↓myType {}
 ```
 
 ```swift
-↓class _MyType {}
+class ↓_MyType {}
 ```
 
 ```swift
-private ↓class MyType_ {}
+private class ↓MyType_ {}
 ```
 
 ```swift
-↓class My {}
+class ↓My {}
 ```
 
 ```swift
-↓class AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA {}
+class ↓AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA {}
 ```
 
 ```swift
-↓struct myType {}
+struct ↓myType {}
 ```
 
 ```swift
-↓struct _MyType {}
+struct ↓_MyType {}
 ```
 
 ```swift
-private ↓struct MyType_ {}
+private struct ↓MyType_ {}
 ```
 
 ```swift
-↓struct My {}
+struct ↓My {}
 ```
 
 ```swift
-↓struct AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA {}
+struct ↓AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA {}
 ```
 
 ```swift
-↓enum myType {}
+enum ↓myType {}
 ```
 
 ```swift
-↓enum _MyType {}
+enum ↓_MyType {}
 ```
 
 ```swift
-private ↓enum MyType_ {}
+private enum ↓MyType_ {}
 ```
 
 ```swift
-↓enum My {}
+enum ↓My {}
 ```
 
 ```swift
-↓enum AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA {}
+enum ↓AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA {}
 ```
 
 ```swift
@@ -14086,6 +16219,94 @@ protocol Foo {
 
 
 
+## Unneeded Break in Switch
+
+Identifier | Enabled by default | Supports autocorrection | Kind 
+--- | --- | --- | ---
+`unneeded_break_in_switch` | Enabled | No | idiomatic
+
+Avoid using unneeded break statements.
+
+### Examples
+
+<details>
+<summary>Non Triggering Examples</summary>
+
+```swift
+switch foo {
+case .bar:
+    break
+}
+```
+
+```swift
+switch foo {
+default:
+    break
+}
+```
+
+```swift
+switch foo {
+case .bar:
+    for i in [0, 1, 2] { break }
+}
+```
+
+```swift
+switch foo {
+case .bar:
+    if true { break }
+}
+```
+
+```swift
+switch foo {
+case .bar:
+    something()
+}
+```
+
+</details>
+<details>
+<summary>Triggering Examples</summary>
+
+```swift
+switch foo {
+case .bar:
+    something()
+    ↓break
+}
+```
+
+```swift
+switch foo {
+case .bar:
+    something()
+    ↓break // comment
+}
+```
+
+```swift
+switch foo {
+default:
+    something()
+    ↓break
+}
+```
+
+```swift
+switch foo {
+case .foo, .foo2 where condition:
+    something()
+    ↓break
+}
+```
+
+</details>
+
+
+
 ## Unneeded Parentheses in Closure Argument
 
 Identifier | Enabled by default | Supports autocorrection | Kind 
@@ -14105,6 +16326,11 @@ let foo = { (bar: Int) in }
 ```
 
 ```swift
+let foo = { bar, _  in }
+
+```
+
+```swift
 let foo = { bar in }
 
 ```
@@ -14120,6 +16346,11 @@ let foo = { bar -> Bool in return true }
 
 ```swift
 call(arg: { ↓(bar) in })
+
+```
+
+```swift
+call(arg: { ↓(bar, _) in })
 
 ```
 
@@ -14224,6 +16455,12 @@ hoge(arg: num) { num in
   return num
 }
 
+```
+
+```swift
+({ (manager: FileManager) in
+  print(manager)
+})(FileManager.default)
 ```
 
 </details>
@@ -15132,6 +17369,99 @@ func testFoo() {
 func testFoo() {
     ↓XCTFail("")
 }
+```
+
+</details>
+
+
+
+## Yoda condition rule
+
+Identifier | Enabled by default | Supports autocorrection | Kind 
+--- | --- | --- | ---
+`yoda_condition` | Disabled | No | lint
+
+The variable should be placed on the left, the constant on the right of a comparison operator.
+
+### Examples
+
+<details>
+<summary>Non Triggering Examples</summary>
+
+```swift
+if foo == 42 {}
+
+```
+
+```swift
+if foo <= 42.42 {}
+
+```
+
+```swift
+guard foo >= 42 else { return }
+
+```
+
+```swift
+guard foo != "str str" else { return }
+```
+
+```swift
+while foo < 10 { }
+
+```
+
+```swift
+while foo > 1 { }
+
+```
+
+```swift
+while foo + 1 == 2
+```
+
+```swift
+if optionalValue?.property ?? 0 == 2
+```
+
+```swift
+if foo == nil
+```
+
+</details>
+<details>
+<summary>Triggering Examples</summary>
+
+```swift
+↓if 42 == foo {}
+
+```
+
+```swift
+↓if 42.42 >= foo {}
+
+```
+
+```swift
+↓guard 42 <= foo else { return }
+
+```
+
+```swift
+↓guard "str str" != foo else { return }
+```
+
+```swift
+↓while 10 > foo { }
+```
+
+```swift
+↓while 1 < foo { }
+```
+
+```swift
+↓if nil == foo
 ```
 
 </details>

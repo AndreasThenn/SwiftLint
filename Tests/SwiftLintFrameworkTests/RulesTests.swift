@@ -19,9 +19,7 @@ class RulesTests: XCTestCase {
     }
 
     func testBlockBasedKVO() {
-        #if swift(>=3.2)
-            verifyRule(BlockBasedKVORule.description)
-        #endif
+        verifyRule(BlockBasedKVORule.description)
     }
 
     func testClassDelegateProtocol() {
@@ -56,7 +54,7 @@ class RulesTests: XCTestCase {
         verifyRule(ConditionalReturnsOnNewlineRule.description)
     }
 
-    func testContainsOverFirstNotNilRule() {
+    func testContainsOverFirstNotNil() {
         verifyRule(ContainsOverFirstNotNilRule.description)
     }
 
@@ -70,6 +68,14 @@ class RulesTests: XCTestCase {
 
     func testDiscardedNotificationCenterObserver() {
         verifyRule(DiscardedNotificationCenterObserverRule.description)
+    }
+
+    func testDiscouragedObjectLiteral() {
+        verifyRule(DiscouragedObjectLiteralRule.description)
+    }
+
+    func testDiscouragedOptionalBoolean() {
+        verifyRule(DiscouragedOptionalBooleanRule.description)
     }
 
     func testDynamicInline() {
@@ -90,6 +96,10 @@ class RulesTests: XCTestCase {
 
     func testEmptyParenthesesWithTrailingClosure() {
         verifyRule(EmptyParenthesesWithTrailingClosureRule.description)
+    }
+
+    func testExplicitACL() {
+        verifyRule(ExplicitACLRule.description)
     }
 
     func testExplicitEnumRawValue() {
@@ -197,6 +207,10 @@ class RulesTests: XCTestCase {
         verifyRule(LetVarWhitespaceRule.description)
     }
 
+    func testLiteralExpressionEndIdentation() {
+        verifyRule(LiteralExpressionEndIdentationRule.description)
+    }
+
     func testMark() {
         verifyRule(MarkRule.description, skipCommentTests: true)
     }
@@ -213,7 +227,7 @@ class RulesTests: XCTestCase {
         verifyRule(NestingRule.description)
     }
 
-    func testNoExtensionAccessModifierRule() {
+    func testNoExtensionAccessModifier() {
         verifyRule(NoExtensionAccessModifierRule.description)
     }
 
@@ -241,8 +255,20 @@ class RulesTests: XCTestCase {
         verifyRule(OperatorUsageWhitespaceRule.description)
     }
 
+    func testOverrideInExtension() {
+        verifyRule(OverrideInExtensionRule.description)
+    }
+
     func testPatternMatchingKeywords() {
         verifyRule(PatternMatchingKeywordsRule.description)
+    }
+
+    func testPrefixedTopLevelConstant() {
+        verifyRule(PrefixedTopLevelConstantRule.description)
+    }
+
+    func testPrivateAction() {
+        verifyRule(PrivateActionRule.description)
     }
 
     func testPrivateOutlet() {
@@ -276,6 +302,14 @@ class RulesTests: XCTestCase {
         verifyRule(QuickDiscouragedCallRule.description)
     }
 
+    func testQuickDiscouragedFocusedTest() {
+        verifyRule(QuickDiscouragedFocusedTestRule.description)
+    }
+
+    func testQuickDiscouragedPendingTest() {
+        verifyRule(QuickDiscouragedPendingTestRule.description)
+    }
+
     func testRedundantDiscardableLet() {
         verifyRule(RedundantDiscardableLetRule.description)
     }
@@ -296,6 +330,11 @@ class RulesTests: XCTestCase {
         verifyRule(RedundantVoidReturnRule.description)
     }
 
+    func testRequiredEnumCase() {
+        let configuration = ["NetworkResponsable": ["notConnected": "error"]]
+        verifyRule(RequiredEnumCaseRule.description, ruleConfiguration: configuration)
+    }
+
     func testReturnArrowWhitespace() {
         verifyRule(ReturnArrowWhitespaceRule.description)
     }
@@ -306,6 +345,10 @@ class RulesTests: XCTestCase {
 
     func testSingleTestClass() {
         verifyRule(SingleTestClassRule.description)
+    }
+
+    func testSortedFirstLast() {
+        verifyRule(SortedFirstLastRule.description)
     }
 
     func testSortedImports() {
@@ -378,6 +421,10 @@ class RulesTests: XCTestCase {
         verifyRule(TypeBodyLengthRule.description)
     }
 
+    func testUnneededBreakInSwitch() {
+        verifyRule(UnneededBreakInSwitchRule.description)
+    }
+
     func testUnneededParenthesesInClosureArgument() {
         verifyRule(UnneededParenthesesInClosureArgumentRule.description)
     }
@@ -416,5 +463,9 @@ class RulesTests: XCTestCase {
 
     func testXCTFailMessage() {
         verifyRule(XCTFailMessageRule.description)
+    }
+
+    func testYodaCondition() {
+        verifyRule(YodaConditionRule.description)
     }
 }

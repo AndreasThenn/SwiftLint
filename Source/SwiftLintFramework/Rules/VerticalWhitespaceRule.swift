@@ -78,7 +78,7 @@ public struct VerticalWhitespaceRule: CorrectableRule, ConfigurationProviderRule
         let blankLinesSections = extractSections(from: filteredLines)
 
         // filtering out violations in comments and strings
-        let stringAndComments = Set(SyntaxKind.commentAndStringKinds())
+        let stringAndComments = SyntaxKind.commentAndStringKinds
         let syntaxMap = file.syntaxMap
         let result = blankLinesSections.flatMap { eachSection -> (lastLine: Line, linesToRemove: Int)? in
             guard let lastLine = eachSection.last else {
@@ -101,7 +101,8 @@ public struct VerticalWhitespaceRule: CorrectableRule, ConfigurationProviderRule
 
         var previousIndex = 0
         for (index, line) in lines.enumerated() {
-            if lines[previousIndex].index + 1 == line.index {
+            let previousLine: Line = lines[previousIndex]
+            if previousLine.index + 1 == line.index {
                 lineSection.append(line)
             } else if !lineSection.isEmpty {
                 blankLinesSections.append(lineSection)

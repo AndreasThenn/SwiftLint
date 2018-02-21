@@ -53,13 +53,14 @@ extension File {
         return regions
     }
 
-    internal func commands() -> [Command] {
+    internal func commands(in range: NSRange? = nil) -> [Command] {
         if sourcekitdFailed {
             return []
         }
         let contents = self.contents.bridge()
+        let range = range ?? NSRange(location: 0, length: contents.length)
         let pattern = "swiftlint:(enable|disable)(:previous|:this|:next)?\\ [^\\n]+"
-        return match(pattern: pattern, with: [.comment]).flatMap { range in
+        return match(pattern: pattern, with: [.comment], range: range).flatMap { range in
             return Command(string: contents, range: range)
         }.flatMap { command in
             return command.expand()
@@ -138,7 +139,7 @@ extension File {
                 results[line.index].append(swiftDeclarationKind)
             }
             let lineEnd = NSMaxRange(line.byteRange)
-            if structure.byteRange.location > lineEnd {
+            if structure.byteRange.location >= lineEnd {
                 maybeLine = lineIterator.next()
             } else {
                 maybeStructure = structureIterator.next()
@@ -197,7 +198,7 @@ extension File {
      file contents.
      */
     internal func match(pattern: String,
-                        excludingSyntaxKinds syntaxKinds: [SyntaxKind],
+                        excludingSyntaxKinds syntaxKinds: Set<SyntaxKind>,
                         range: NSRange? = nil) -> [NSRange] {
         return match(pattern: pattern, range: range)
             .filter { $0.1.filter(syntaxKinds.contains).isEmpty }
@@ -208,7 +209,7 @@ extension File {
 
     internal func match(pattern: String,
                         range: NSRange? = nil,
-                        excludingSyntaxKinds: [SyntaxKind],
+                        excludingSyntaxKinds: Set<SyntaxKind>,
                         excludingPattern: String,
                         exclusionMapping: MatchMapping = { $0.range }) -> [NSRange] {
         let matches = match(pattern: pattern, excludingSyntaxKinds: excludingSyntaxKinds)
@@ -223,10 +224,10 @@ extension File {
 
     internal func append(_ string: String) {
         guard let stringData = string.data(using: .utf8) else {
-            fatalError("can't encode '\(string)' with UTF8")
+            queuedFatalError("can't encode '\(string)' with UTF8")
         }
         guard let path = path, let fileHandle = FileHandle(forWritingAtPath: path) else {
-            fatalError("can't write to path '\(String(describing: self.path))'")
+            queuedFatalError("can't write to path '\(String(describing: self.path))'")
         }
         _ = fileHandle.seekToEndOfFile()
         fileHandle.write(stringData)
@@ -235,22 +236,22 @@ extension File {
         lines = contents.bridge().lines()
     }
 
-    internal func write(_ string: String) {
+    internal func write<S: StringProtocol>(_ string: S) {
         guard string != contents else {
             return
         }
         guard let path = path else {
-            fatalError("file needs a path to call write(_:)")
+            queuedFatalError("file needs a path to call write(_:)")
         }
-        guard let stringData = string.data(using: .utf8) else {
-            fatalError("can't encode '\(string)' with UTF8")
+        guard let stringData = String(string).data(using: .utf8) else {
+            queuedFatalError("can't encode '\(string)' with UTF8")
         }
         do {
             try stringData.write(to: URL(fileURLWithPath: path), options: .atomic)
         } catch {
-            fatalError("can't write file to \(path)")
+            queuedFatalError("can't write file to \(path)")
         }
-        contents = string
+        contents = String(string)
         invalidateCache()
         lines = contents.bridge().lines()
     }
@@ -268,7 +269,7 @@ extension File {
     }
 
     fileprivate func numberOfCommentAndWhitespaceOnlyLines(startLine: Int, endLine: Int) -> Int {
-        let commentKinds = Set(SyntaxKind.commentKinds())
+        let commentKinds = SyntaxKind.commentKinds
         return syntaxKindsByLines[startLine...endLine].filter { kinds in
             kinds.filter { !commentKinds.contains($0) }.isEmpty
         }.count
@@ -284,8 +285,9 @@ extension File {
         return (count > limit, count)
     }
 
+    private typealias RangePatternTemplate = (NSRange, String, String)
+
     internal func correct<R: Rule>(legacyRule: R, patterns: [String: String]) -> [Correction] {
-        typealias RangePatternTemplate = (NSRange, String, String)
         let matches: [RangePatternTemplate]
         matches = patterns.flatMap({ pattern, template -> [RangePatternTemplate] in
             return match(pattern: pattern).filter { range, kinds in

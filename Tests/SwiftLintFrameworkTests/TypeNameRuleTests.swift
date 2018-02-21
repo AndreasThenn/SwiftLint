@@ -29,13 +29,23 @@ class TypeNameRuleTests: XCTestCase {
         verifyRule(description, ruleConfiguration: ["allowed_symbols": ["$"]])
     }
 
+    func testTypeNameWithAllowedSymbolsAndViolation() {
+        let baseDescription = TypeNameRule.description
+        let triggeringExamples = [
+            "class ↓My_Type$ {}"
+        ]
+
+        let description = baseDescription.with(triggeringExamples: triggeringExamples)
+        verifyRule(description, ruleConfiguration: ["allowed_symbols": ["$", "%"]])
+    }
+
     func testTypeNameWithIgnoreStartWithLowercase() {
         let baseDescription = TypeNameRule.description
         let triggeringExamplesToRemove = [
             "private typealias ↓foo = Void",
-            "↓class myType {}",
-            "↓struct myType {}",
-            "↓enum myType {}"
+            "class ↓myType {}",
+            "struct ↓myType {}",
+            "enum ↓myType {}"
         ]
         let nonTriggeringExamples = baseDescription.nonTriggeringExamples +
             triggeringExamplesToRemove.map { $0.replacingOccurrences(of: "↓", with: "") }

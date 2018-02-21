@@ -40,6 +40,7 @@ class ConfigurationTests: XCTestCase {
         XCTAssertEqual(config.disabledRules, [])
         XCTAssertEqual(config.included, [])
         XCTAssertEqual(config.excluded, [])
+        XCTAssertEqual(config.indentation, .spaces(count: 4))
         XCTAssertEqual(config.reporter, "xcode")
         XCTAssertEqual(reporterFrom(identifier: config.reporter).identifier, "xcode")
     }
@@ -56,6 +57,7 @@ class ConfigurationTests: XCTestCase {
         XCTAssertEqual(config.disabledRules, expectedConfig.disabledRules)
         XCTAssertEqual(config.included, expectedConfig.included)
         XCTAssertEqual(config.excluded, expectedConfig.excluded)
+        XCTAssertEqual(config.indentation, expectedConfig.indentation)
         XCTAssertEqual(config.reporter, expectedConfig.reporter)
 
         FileManager.default.changeCurrentDirectoryPath(previousWorkingDir)
@@ -96,7 +98,9 @@ class ConfigurationTests: XCTestCase {
             "whitelist_rules": whitelist
         ]
         let combinedRulesConfigDict = enabledRulesConfigDict.reduce(disabledRulesConfigDict) {
-            var d = $0; d[$1.0] = $1.1; return d
+            var dict = $0
+            dict[$1.0] = $1.1
+            return dict
         }
         var configuration = Configuration(dict: enabledRulesConfigDict)
         XCTAssertNil(configuration)
@@ -176,6 +180,20 @@ class ConfigurationTests: XCTestCase {
         XCTAssertEqual(["directory/File1.swift", "directory/File2.swift"], paths)
     }
 
+    func testLintablePaths() {
+        let paths = Configuration()!.lintablePaths(inPath: projectMockPathLevel0)
+        let filenames = paths.map { $0.bridge().lastPathComponent }.sorted()
+        let expectedFilenames = [
+            "DirectoryLevel1.swift",
+            "Level0.swift",
+            "Level1.swift",
+            "Level2.swift",
+            "Level3.swift"
+        ]
+
+        XCTAssertEqual(expectedFilenames, filenames)
+    }
+
     // MARK: - Testing Configuration Equality
 
     func testIsEqualTo() {
@@ -208,6 +226,23 @@ class ConfigurationTests: XCTestCase {
                                           optional: false, quiet: true)
         let file = File(path: projectMockSwift0)!
         XCTAssertEqual(configuration.configuration(for: file), configuration)
+    }
+
+    // MARK: - Testing custom indentation
+
+    func testIndentationTabs() {
+        let configuration = Configuration(dict: ["indentation": "tabs"])!
+        XCTAssertEqual(configuration.indentation, .tabs)
+    }
+
+    func testIndentationSpaces() {
+        let configuration = Configuration(dict: ["indentation": 2])!
+        XCTAssertEqual(configuration.indentation, .spaces(count: 2))
+    }
+
+    func testIndentationFallback() {
+        let configuration = Configuration(dict: ["indentation": "invalid"])!
+        XCTAssertEqual(configuration.indentation, .spaces(count: 4))
     }
 
     // MARK: - Testing Rules from config dictionary

@@ -5,7 +5,7 @@
 //  Created by Scott Hoyt on 12/28/15.
 //  Copyright © 2015 Realm. All rights reserved.
 //
-// Generated using Sourcery 0.8.0 — https://github.com/krzysztofzablocki/Sourcery
+// Generated using Sourcery 0.10.1 — https://github.com/krzysztofzablocki/Sourcery
 // DO NOT EDIT
 
 public let masterRuleList = RuleList(rules: [
@@ -27,11 +27,14 @@ public let masterRuleList = RuleList(rules: [
     CyclomaticComplexityRule.self,
     DiscardedNotificationCenterObserverRule.self,
     DiscouragedDirectInitRule.self,
+    DiscouragedObjectLiteralRule.self,
+    DiscouragedOptionalBooleanRule.self,
     DynamicInlineRule.self,
     EmptyCountRule.self,
     EmptyEnumArgumentsRule.self,
     EmptyParametersRule.self,
     EmptyParenthesesWithTrailingClosureRule.self,
+    ExplicitACLRule.self,
     ExplicitEnumRawValueRule.self,
     ExplicitInitRule.self,
     ExplicitTopLevelACLRule.self,
@@ -63,7 +66,9 @@ public let masterRuleList = RuleList(rules: [
     LegacyNSGeometryFunctionsRule.self,
     LetVarWhitespaceRule.self,
     LineLengthRule.self,
+    LiteralExpressionEndIdentationRule.self,
     MarkRule.self,
+    MultilineArgumentsRule.self,
     MultilineParametersRule.self,
     MultipleClosuresWithTrailingClosureRule.self,
     NestingRule.self,
@@ -77,21 +82,28 @@ public let masterRuleList = RuleList(rules: [
     OperatorFunctionWhitespaceRule.self,
     OperatorUsageWhitespaceRule.self,
     OverriddenSuperCallRule.self,
+    OverrideInExtensionRule.self,
     PatternMatchingKeywordsRule.self,
+    PrefixedTopLevelConstantRule.self,
+    PrivateActionRule.self,
     PrivateOutletRule.self,
     PrivateOverFilePrivateRule.self,
     PrivateUnitTestRule.self,
     ProhibitedSuperRule.self,
     ProtocolPropertyAccessorsOrderRule.self,
     QuickDiscouragedCallRule.self,
+    QuickDiscouragedFocusedTestRule.self,
+    QuickDiscouragedPendingTestRule.self,
     RedundantDiscardableLetRule.self,
     RedundantNilCoalescingRule.self,
     RedundantOptionalInitializationRule.self,
     RedundantStringEnumValueRule.self,
     RedundantVoidReturnRule.self,
+    RequiredEnumCaseRule.self,
     ReturnArrowWhitespaceRule.self,
     ShorthandOperatorRule.self,
     SingleTestClassRule.self,
+    SortedFirstLastRule.self,
     SortedImportsRule.self,
     StatementPositionRule.self,
     StrictFilePrivateRule.self,
@@ -107,6 +119,7 @@ public let masterRuleList = RuleList(rules: [
     TrailingWhitespaceRule.self,
     TypeBodyLengthRule.self,
     TypeNameRule.self,
+    UnneededBreakInSwitchRule.self,
     UnneededParenthesesInClosureArgumentRule.self,
     UnusedClosureParameterRule.self,
     UnusedEnumeratedRule.self,
@@ -117,5 +130,6 @@ public let masterRuleList = RuleList(rules: [
     VerticalWhitespaceRule.self,
     VoidReturnRule.self,
     WeakDelegateRule.self,
-    XCTFailMessageRule.self
+    XCTFailMessageRule.self,
+    YodaConditionRule.self
 ])

@@ -86,7 +86,7 @@ public struct NimbleOperatorRule: ConfigurationProviderRule, OptInRule, Correcta
         let variablePattern = "(.(?!expect\\())+?"
         let pattern = "expect\\(\(variablePattern)\\)\\.to(Not)?\\(\(operatorsPattern)\\(\(variablePattern)\\)\\)"
 
-        let excludingKinds = SyntaxKind.commentKinds()
+        let excludingKinds = SyntaxKind.commentKinds
 
         return file.match(pattern: pattern)
             .filter { _, kinds in
@@ -138,11 +138,7 @@ private extension String {
 
         var correctedString: String?
 
-        for (pattern, operatorString) in [toPattern, toNotPattern] {
-            guard let operatorString = operatorString else {
-                continue
-            }
-
+        for case let (pattern, operatorString?) in [toPattern, toNotPattern] {
             let expression = regex(pattern)
             if !expression.matches(in: self, options: [], range: range).isEmpty {
                 correctedString = expression.stringByReplacingMatches(in: self,

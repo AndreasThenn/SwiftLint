@@ -11,7 +11,7 @@ import SourceKittenFramework
 
 private var responseCache = Cache({ file -> [String: SourceKitRepresentable]? in
     do {
-        return try Request.editorOpen(file: file).failableSend()
+        return try Request.editorOpen(file: file).send()
     } catch let error as Request.Error {
         queuedPrintError(error.description)
         return nil
@@ -33,6 +33,7 @@ private var syntaxTokensByLinesCache = Cache({ file in file.syntaxTokensByLine()
 internal typealias AssertHandler = () -> Void
 
 private var assertHandlers = [String: AssertHandler]()
+private var assertHandlerCache = Cache({ file in assertHandlers[file.cacheKey] })
 
 private struct RebuildQueue {
     private let lock = NSLock()
@@ -53,7 +54,7 @@ private struct RebuildQueue {
 
 private var queueForRebuild = RebuildQueue()
 
-private struct Cache<T> {
+private class Cache<T> {
     private var values = [String: T]()
     private let factory: (File) -> T
     private let lock = NSLock()
@@ -62,7 +63,7 @@ private struct Cache<T> {
         self.factory = factory
     }
 
-    fileprivate mutating func get(_ file: File) -> T {
+    fileprivate func get(_ file: File) -> T {
         let key = file.cacheKey
         lock.lock()
         defer { lock.unlock() }
@@ -74,19 +75,19 @@ private struct Cache<T> {
         return value
     }
 
-    fileprivate mutating func invalidate(_ file: File) {
+    fileprivate func invalidate(_ file: File) {
         doLocked { values.removeValue(forKey: file.cacheKey) }
     }
 
-    fileprivate mutating func clear() {
+    fileprivate func clear() {
         doLocked { values.removeAll(keepingCapacity: false) }
     }
 
-    fileprivate mutating func set(key: String, value: T) {
+    fileprivate func set(key: String, value: T) {
         doLocked { values[key] = value }
     }
 
-    fileprivate mutating func unset(key: String) {
+    fileprivate func unset(key: String) {
         doLocked { values.removeValue(forKey: key) }
     }
 
@@ -118,10 +119,10 @@ extension File {
 
     internal var assertHandler: AssertHandler? {
         get {
-            return assertHandlers[cacheKey]
+            return assertHandlerCache.get(self)
         }
         set {
-            assertHandlers[cacheKey] = newValue
+            assertHandlerCache.set(key: cacheKey, value: newValue)
         }
     }
 
@@ -131,7 +132,7 @@ extension File {
                 handler()
                 return Structure(sourceKitResponse: [:])
             }
-            fatalError("Never call this for file that sourcekitd fails.")
+            queuedFatalError("Never call this for file that sourcekitd fails.")
         }
         return structure
     }
@@ -142,7 +143,7 @@ extension File {
                 handler()
                 return SyntaxMap(data: [])
             }
-            fatalError("Never call this for file that sourcekitd fails.")
+            queuedFatalError("Never call this for file that sourcekitd fails.")
         }
         return syntaxMap
     }
@@ -153,7 +154,7 @@ extension File {
                 handler()
                 return []
             }
-            fatalError("Never call this for file that sourcekitd fails.")
+            queuedFatalError("Never call this for file that sourcekitd fails.")
         }
         return syntaxTokensByLines
     }
@@ -164,14 +165,14 @@ extension File {
                 handler()
                 return []
             }
-            fatalError("Never call this for file that sourcekitd fails.")
+            queuedFatalError("Never call this for file that sourcekitd fails.")
         }
         return syntaxKindsByLines
     }
 
     public func invalidateCache() {
         responseCache.invalidate(self)
-        assertHandlers.removeValue(forKey: cacheKey)
+        assertHandlerCache.invalidate(self)
         structureCache.invalidate(self)
         syntaxMapCache.invalidate(self)
         syntaxTokensByLinesCache.invalidate(self)
@@ -181,7 +182,7 @@ extension File {
     internal static func clearCaches() {
         queueForRebuild.clear()
         responseCache.clear()
-        assertHandlers.removeAll(keepingCapacity: false)
+        assertHandlerCache.clear()
         structureCache.clear()
         syntaxMapCache.clear()
         syntaxTokensByLinesCache.clear()

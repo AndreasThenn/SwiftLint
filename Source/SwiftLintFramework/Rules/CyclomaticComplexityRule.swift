@@ -41,7 +41,7 @@ public struct CyclomaticComplexityRule: ASTRule, ConfigurationProviderRule {
 
     public func validate(file: File, kind: SwiftDeclarationKind,
                          dictionary: [String: SourceKitRepresentable]) -> [StyleViolation] {
-        guard SwiftDeclarationKind.functionKinds().contains(kind) else {
+        guard SwiftDeclarationKind.functionKinds.contains(kind) else {
             return []
         }
 
@@ -69,7 +69,7 @@ public struct CyclomaticComplexityRule: ASTRule, ConfigurationProviderRule {
             }
 
             if let declarationKind = SwiftDeclarationKind(rawValue: kind),
-                SwiftDeclarationKind.functionKinds().contains(declarationKind) {
+                SwiftDeclarationKind.functionKinds.contains(declarationKind) {
                 return complexity
             }
 
@@ -100,10 +100,9 @@ public struct CyclomaticComplexityRule: ASTRule, ConfigurationProviderRule {
         let bodyOffset = dictionary.bodyOffset ?? 0
         let bodyLength = dictionary.bodyLength ?? 0
 
-        let c = file.contents.bridge()
-            .substringWithByteRange(start: bodyOffset, length: bodyLength) ?? ""
+        let contents = file.contents.bridge().substringWithByteRange(start: bodyOffset, length: bodyLength) ?? ""
 
-        let fallthroughCount = c.components(separatedBy: "fallthrough").count - 1
+        let fallthroughCount = contents.components(separatedBy: "fallthrough").count - 1
         return complexity - fallthroughCount
     }
 

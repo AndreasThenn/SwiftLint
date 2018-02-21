@@ -46,6 +46,11 @@ Note that this will add the SwiftLint binaries, its dependencies' binaries and t
 library distribution to the `Pods/` directory, so checking in this directory to SCM such as
 git is discouraged.
 
+### Using [Mint](https://github.com/yonaskolb/mint):
+```
+$ mint run realm/SwiftLint
+```
+
 ### Using a pre-built package:
 
 You can also install SwiftLint by downloading `SwiftLint.pkg` from the
@@ -55,7 +60,7 @@ running it.
 ### Compiling from source:
 
 You can also build from source by cloning this project and running
-`git submodule update --init --recursive; make install` (Xcode 8.3 or later).
+`git submodule update --init --recursive; make install` (Xcode 9.0 or later).
 
 ## Usage
 
@@ -332,7 +337,7 @@ by using `${SOME_VARIABLE}` in a string.
 
 #### Defining Custom Rules
 
-You can define custom regex-based rules in you configuration file using the
+You can define custom regex-based rules in your configuration file using the
 following syntax:
 
 ```yaml
@@ -379,6 +384,8 @@ are all the possible syntax kinds:
 * string
 * string_interpolation_anchor
 * typeidentifier
+
+If using custom rules alongside a whitelist, make sure to add `custom_rules` as an item under `whitelist_rules`.
 
 #### Nested Configurations
 

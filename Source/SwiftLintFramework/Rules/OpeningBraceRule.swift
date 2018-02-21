@@ -14,7 +14,7 @@ private let whitespaceAndNewlineCharacterSet = CharacterSet.whitespacesAndNewlin
 private extension File {
     func violatingOpeningBraceRanges() -> [(range: NSRange, location: Int)] {
         return match(pattern: "(?:[^( ]|[\\s(][\\s]+)\\{",
-                     excludingSyntaxKinds: SyntaxKind.commentAndStringKinds(),
+                     excludingSyntaxKinds: SyntaxKind.commentAndStringKinds,
                      excludingPattern: "(?:if|guard|while)\\n[^\\{]+?[\\s\\t\\n]\\{").map {
             let branceRange = contents.bridge().range(of: "{", options: .literal, range: $0)
             return ($0, branceRange.location)
@@ -118,7 +118,7 @@ public struct OpeningBraceRule: CorrectableRule, ConfigurationProviderRule {
         var correctString = " {"
 
         // "struct Command{" has violating string = "d{", so ignore first "d"
-        if capturedString.characters.count == 2 &&
+        if capturedString.count == 2 &&
             capturedString.rangeOfCharacter(from: whitespaceAndNewlineCharacterSet) == nil {
             adjustedRange = NSRange(
                 location: violatingRange.location + 1,
