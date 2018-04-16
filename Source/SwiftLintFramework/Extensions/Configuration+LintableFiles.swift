@@ -15,7 +15,7 @@ extension Configuration {
     }
 
     public func lintableFiles(ofFiles files: [File]) -> [File] {
-        let excludedPaths = excluded.compactMap {
+        let excludedPaths = excluded.flatMap {
             FileManager.default.filesToLint(inPath: $0, rootDirectory: rootPath)
         }
         return files.filter {
