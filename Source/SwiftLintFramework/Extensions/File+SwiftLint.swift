@@ -20,9 +20,9 @@ internal func regex(_ pattern: String,
 }
 
 extension File {
-    internal func regions(restrictingRuleIdentifiers: [String]? = nil) -> [Region] {
+    internal func regions(restrictingRuleIdentifiers: Set<RuleIdentifier>? = nil) -> [Region] {
         var regions = [Region]()
-        var disabledRules = Set<String>()
+        var disabledRules = Set<RuleIdentifier>()
         let commands: [Command]
         if let restrictingRuleIdentifiers = restrictingRuleIdentifiers {
             commands = self.commands().filter { command in
@@ -34,20 +34,29 @@ extension File {
         let commandPairs = zip(commands, Array(commands.dropFirst().map(Optional.init)) + [nil])
         for (command, nextCommand) in commandPairs {
             switch command.action {
-            case .disable: disabledRules.formUnion(command.ruleIdentifiers)
-            case .enable: disabledRules.subtract(command.ruleIdentifiers)
+            case .disable:
+                disabledRules.formUnion(command.ruleIdentifiers)
+
+            case .enable:
+                disabledRules.subtract(command.ruleIdentifiers)
             }
+
             let start = Location(file: path, line: command.line, character: command.character)
             let end = endOf(next: nextCommand)
             guard start < end else { continue }
             var didSetRegion = false
             for (index, region) in zip(regions.indices, regions) where region.start == start && region.end == end {
-                regions[index] = Region(start: start, end: end,
-                                        disabledRuleIdentifiers: disabledRules.union(region.disabledRuleIdentifiers))
+                regions[index] = Region(
+                    start: start,
+                    end: end,
+                    disabledRuleIdentifiers: disabledRules.union(region.disabledRuleIdentifiers)
+                )
                 didSetRegion = true
             }
             if !didSetRegion {
-                regions.append(Region(start: start, end: end, disabledRuleIdentifiers: disabledRules))
+                regions.append(
+                    Region(start: start, end: end, disabledRuleIdentifiers: disabledRules)
+                )
             }
         }
         return regions
@@ -60,7 +69,7 @@ extension File {
         let contents = self.contents.bridge()
         let range = range ?? NSRange(location: 0, length: contents.length)
         let pattern = "swiftlint:(enable|disable)(:previous|:this|:next)?\\ [^\\n]+"
-        return match(pattern: pattern, with: [.comment], range: range).flatMap { range in
+        return match(pattern: pattern, with: [.comment], range: range).compactMap { range in
             return Command(string: contents, range: range)
         }.flatMap { command in
             return command.expand()
@@ -109,7 +118,7 @@ extension File {
     internal func matchesAndSyntaxKinds(matching pattern: String,
                                         range: NSRange? = nil) -> [(NSTextCheckingResult, [SyntaxKind])] {
         return matchesAndTokens(matching: pattern, range: range).map { textCheckingResult, tokens in
-            (textCheckingResult, tokens.flatMap { SyntaxKind(rawValue: $0.type) })
+            (textCheckingResult, tokens.compactMap { SyntaxKind(rawValue: $0.type) })
         }
     }
 
@@ -182,7 +191,7 @@ extension File {
             return nil
         }
 
-        return tokens.map { $0.flatMap { SyntaxKind(rawValue: $0.type) } }
+        return tokens.map { $0.compactMap { SyntaxKind(rawValue: $0.type) } }
     }
 
     //Added by S2dent
@@ -233,7 +242,6 @@ extension File {
         fileHandle.write(stringData)
         fileHandle.closeFile()
         contents += string
-        lines = contents.bridge().lines()
     }
 
     internal func write<S: StringProtocol>(_ string: S) {
@@ -253,7 +261,6 @@ extension File {
         }
         contents = String(string)
         invalidateCache()
-        lines = contents.bridge().lines()
     }
 
     internal func ruleEnabled(violatingRanges: [NSRange], for rule: Rule) -> [NSRange] {

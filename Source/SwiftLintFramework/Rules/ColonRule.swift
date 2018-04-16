@@ -61,7 +61,8 @@ public struct ColonRule: CorrectableRule, ConfigurationProviderRule {
             "object.method(5, y: \"string\")\n",
             "func abc() { def(ghi: jkl) }",
             "func abc(def: Void) { ghi(jkl: mno) }",
-            "class ABC { let def = ghi(jkl: mno) } }"
+            "class ABC { let def = ghi(jkl: mno) } }",
+            "func foo() { let dict = [1: 1] }"
         ],
         triggeringExamples: [
             "let ↓abc:Void\n",
@@ -110,7 +111,8 @@ public struct ColonRule: CorrectableRule, ConfigurationProviderRule {
             "object.method(x↓:  5, y: \"string\")\n",
             "func abc() { def(ghi↓:jkl) }",
             "func abc(def: Void) { ghi(jkl↓:mno) }",
-            "class ABC { let def = ghi(jkl↓:mno) } }"
+            "class ABC { let def = ghi(jkl↓:mno) } }",
+            "func foo() { let dict = [1↓ : 1] }"
         ],
         corrections: [
             "let ↓abc:Void\n": "let abc: Void\n",
@@ -159,12 +161,15 @@ public struct ColonRule: CorrectableRule, ConfigurationProviderRule {
             "object.method(x↓:  5, y: \"string\")\n": "object.method(x: 5, y: \"string\")\n",
             "func abc() { def(ghi↓:jkl) }": "func abc() { def(ghi: jkl) }",
             "func abc(def: Void) { ghi(jkl↓:mno) }": "func abc(def: Void) { ghi(jkl: mno) }",
-            "class ABC { let def = ghi(jkl↓:mno) } }": "class ABC { let def = ghi(jkl: mno) } }"
+            "class ABC { let def = ghi(jkl↓:mno) } }": "class ABC { let def = ghi(jkl: mno) } }",
+            "func foo() { let dict = [1↓ : 1] }": "func foo() { let dict = [1: 1] }",
+            "class Foo {\n    #if false\n    #else\n        let bar = [\"key\"↓   : \"value\"]\n    #endif\n}":
+            "class Foo {\n    #if false\n    #else\n        let bar = [\"key\": \"value\"]\n    #endif\n}"
         ]
     )
 
     public func validate(file: File) -> [StyleViolation] {
-        let violations = typeColonViolationRanges(in: file, matching: pattern).flatMap { range in
+        let violations = typeColonViolationRanges(in: file, matching: pattern).compactMap { range in
             return StyleViolation(ruleDescription: type(of: self).description,
                                   severity: configuration.severityConfiguration.severity,
                                   location: Location(file: file, characterOffset: range.location))
@@ -217,14 +222,15 @@ public struct ColonRule: CorrectableRule, ConfigurationProviderRule {
         }
         let dictionary = file.structure.dictionary
         let contents = file.contents.bridge()
-        let dictViolations: [RangeWithKind] = dictionaryColonViolationRanges(in: file, dictionary: dictionary).flatMap {
+        let dictViolations: [RangeWithKind] = dictionaryColonViolationRanges(in: file,
+                                                                             dictionary: dictionary).compactMap {
             guard let range = contents.byteRangeToNSRange(start: $0.location, length: $0.length) else {
                 return nil
             }
             return (range: range, kind: .dictionary)
         }
         let functionViolations: [RangeWithKind] = functionCallColonViolationRanges(in: file,
-                                                                                   dictionary: dictionary).flatMap {
+                                                                                   dictionary: dictionary).compactMap {
             guard let range = contents.byteRangeToNSRange(start: $0.location, length: $0.length) else {
                 return nil
             }
